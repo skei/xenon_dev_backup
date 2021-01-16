@@ -1,0 +1,25 @@
+CFLAGS  = /c /5r /fp5 /j /oneatxm /fpi87 /s /zl /y /zq
+LFLAGS  = /fe=$(APP) /s /zl /y /zq
+
+APP = intro.exe
+OBJS = c0.obj       &
+       no87.obj     &
+       int.obj      &
+       std.obj      &
+       mxmplay.obj  &
+       data.obj     &
+       routines.obj &
+       font.obj     &
+       intro.obj
+LIBS =
+
+CC = wcl386
+LL = wcl386
+
+.c.obj : .AUTODEPEND
+        $(CC) $(CFLAGS) $[@
+
+$(APP) : $(OBJS)
+         $(LL) $(LFLAGS) $(OBJS) $(LIBS)
+         pmwlite /c4 $(APP)
+

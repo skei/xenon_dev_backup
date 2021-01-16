@@ -1,0 +1,20 @@
+Kan bruke denne Texture teknikken til det meste innen 3D :)
+
+ş gouraud - hent farger for hvert hj›rne og interpol‚r..
+ş Lambert - Hent fargen (eller intensiteten) v.hj.a Face-normalen
+ş Phong - vinkelverdiene fra hj›rnene - COS i utsetting..
+
+Alle disse trenger kun † interpolere 1 verdi, istedenfor 2 som i
+Texture Mapping og EnvMap
+
+OG; Hvis man ikke roterer vertex-normalene, blir texturen "Wrappet"
+rundt objektet. Kult for kule! Men, + og - Z-vektorer gj›r at texturen
+bilr ogs† p† baksiden (st›rre texture?, mindre Normaler?)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Hvis tabellen er satt opp helt jevnt, kan man se p† denne som en
+tabell... Vinkelen mellom "Lys/View" vektor og Normal..
+Bruk X og Y normal til † finne index i tabell istdf † regne den ut..
+
+Moving LIghtSOurce utf›res enkelt ved † ha en X- og Y-verdi som
+adderes til index i tabellen/texturen...
+

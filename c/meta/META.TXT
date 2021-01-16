@@ -1,0 +1,90 @@
+- Surface crawling
+
+  For all balls
+  - start med x,y,z for sentrum av kula, eller et eller annet punkt INNE i
+  kula. Kalkuler hvilken CUBE dette punktet ligger i, og start herfra.
+  G† i en eller annen retning inntil vi finner en kube som intersecter
+  "edge" p† surface'n (VALUE 1..254 (ikke 0 eller 255)). For † f† det til
+  † funke, m† vi f›rst kalkulere ISO verdiene for alle 8 hj›rner av
+  initial CUBE. Deretter 4 og 4 nye, avhengig av hvilken vei vi
+  "marsjerer".. lag en liten tabell for dette, med 6 entries, og en
+  sub-rutine som tar retning vi marsjerer i som parameter (element i
+  denne lille tabellen). Tabellen inneholder hvilke nye ISO verdier som m†
+  beregnes... S slipper vi † teste og teste... Eller ha 6 rutiner, en for
+  hver retning.. Da sjekker vi ikke i hver enkelt rutine om vi m† g†
+  tilbake... Eller spiller det noen rolle? Det blir jo bare en sjekk, og
+  ikke noe mer (den er jo allerede "behandlet")
+
+  N† kan vi begynner † g† langs surface'n...
+  De sidene (6 stk) p† current CUBE som har ett eller flere hj›rner som er
+  INNE i surface'n (bit satt), m† sjekkes, og vi g†r rekursivt gjennom
+  alle...
+
+  NY TANKE! - trenger vi † sjekke en side hvis ALLE bit'ene er satt?
+  Denne siden er jo totalt inne i surface'n??? Eller? Vel, vi returnerer
+  jo uansett, siden vi EXIT'er hvis denne kuben er totalt inne i ISO'en -
+  men likevel, mange tester kan spares her????
+
+  I tillegg, for † slippe † teste samme kube om og om igjen, har vi en
+  tabell eller noe s†nt med et flagg som sier at Cube_Already_Polygonized,
+  og da har vi jo v‘rt der f›r, og trenger ikke sjekke videre p† denne..
+
+- Vertex sharing
+
+  se i HASH3D.C... Legg opp en liten struktur for de pointerne... HASH
+  vertex'ene (GRID vertexene!!! Vertex 0 i hver kube!!!!)... Sjekk i hash
+  tabellen om vertex'en finnes fra f›r (sjekk alle i linket liste)
+  Lag en tabell med hash-st›rrelse, hvor hvert element er starten p† en
+  linket liste med vertices som er kalkulert for denne kuben... F†rst
+  hash'er man ›verste venstre hj›rne p† kuben, finner vertces som er
+  allerede kalkulert, s† kan man sjekke bare disse.... Og bruke de om
+  igjen hvis den allerede finnes....
+
+  Eller, se mer n›ye p† den CUbe saken jeg har bruke i meta.c
+  Sett opp en 3d array (voxel array), med 12 pointere i hvert element.
+  Disse er pointere til 3d verticer som er kalkulert pr edge i voxelen...
+
+  En global Vertex liste med alle vertices som brukes av polyer... Cube
+  arrayen har pointere inn hit... CurrentVertex initieres til 0. N†r en ny
+  vertex kalkuleres, settes den i Vertices[ CurrentVertex++ ].. Og
+  pointeren i Cube-arrayen settes til † peke dit...
+
+  Nei... Det m† v‘re pointer til pointer...
+
+  1. GlobalVertexList = (sVertex  *)malloc(sizeof(sVertex)*MAXVERTICES));
+     VertexPtrList =    (sVertex **)malloc(sizeof(sVertex)*MAXVERTICES));
+
+     struct cube_t
+     {
+      sVertex **V[12];    // initialiseres til VertexPtrList[n]...
+     }
+
+     cube_t Cube[x][y][z];  //  allokeres?
+
+     Ny vertex - kalkul‚r en av GlobalVertexList (›kende index). og sett
+     den ptr i VertexPtrList som Cube[n].V[edge] peker til, til † peke p†
+     denne....
+     Neste Kube som har en V[n] som peker p† en vertex, peker inn i
+     VertexPtrList, som igjen peker til den allerede kalkulerte Vertex'en.
+     S† til slutt har vi GlobalVertexList[ NumVertices ] ferdige til
+     bruk... (Denne kan kanskje v‘re Vertices strukturen i et 3D objekt?
+
+
+
+Optimeringer:
+
+1. Surface Crawling...
+   - For † slippe † kalkulere ISO verdiene for HELE
+     grid'en.. En 32x32x32 grid har 32768 ISO'er, og hver av disse
+     kalkuleres med endel muls, divs, etc... Det blir mange etterhvert...
+   - Ogs† for † slippe † teste alle kubene for polygonizing... Bare de
+     kubene som inneholder surface polygoniseres...
+
+2. Vertex sharing...
+   -  kalkulere vertex'en (interpolere langs cube-edge) og kalkulering av
+     normal tar tid, s† hvis vi kan unng† for mange av disse, er det bra
+     :)...
+     Ogs†, normal-beregning. Kanskje det er bedre † beregne face-normal
+     for polyene etter at alle er beregnet, og deretter vertex-normaler
+     som gjennomsnitt av alle face-normalene som deler denne verticen?
+     Kanskje det blir smoothere surface da... ?

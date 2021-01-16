@@ -1,0 +1,18 @@
+EAX                      temp
+EBX     temp
+ECX     XInt:XFrac  YInt:YFrac
+EDX     adder to ecx
+ESI
+EDI     Screen-pos (y*320+x1)
+EBP     counter
+
+Inner1:
+ shld ebx,ecx,8
+ mov bh,ch              ; BX = Texture Index
+ mov al,[Texture+bx]    ; AL = Pixel
+ mov [edi+ebp],al
+ add ecx,edx
+ inc ebp
+ jnz Inner1
+
+

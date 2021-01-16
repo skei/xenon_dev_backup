@@ -1,0 +1,12 @@
+Screen-Layout:
+
+- Sample Number (1 - 31)
+- 5 Buttions for Modifiers (labeled 1..5)
+- ADSR
+
+Modifiers:
+ WaveForm   - Button som skifter tekst
+ Volume     - 0..255 Enter field (2 tegn) $°°
+ Command    - Button som skifter tekst
+ Adder      - 2 Enter Fields $°°.$°°
+

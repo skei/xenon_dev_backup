@@ -1,0 +1,171 @@
+                         ЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬ
+                     ЬЬЯЯ                           ЯЯЬЬ
+                   ЬЯ    ЬЬ      ЬЬЬ      ЬЬ            ЯЬ     
+                  ЬЯ     ЫЫ      ЯЯЯ      ЫЫ             ЯЬ          
+                  Ы      ЫЫЯЯЯ  ЯЫЫЫ ЫЫЫЫЯЫЫ ЫЫЯЫЫЫЫ      Ы
+                  Ы      ЫЫ ЫЫЫЫ ЫЫЫ ЫЫЫЫ ЫЫ ЫЫ ЫЫЫЫ      Ы
+                  Ы      ЫЫ ЫЫЫЫ ЫЫЫ ЫЫЫЫ ЫЫ ЫЫЯЯЯЯЯ      Ы           
+                   Ы     ЫЫЬЫЫЫЫ ЫЫЫ ЫЫЫЫЬЫЫ ЫЫЬЫЫЫЫ     Ы
+                    ЯЬЬ                               ЬЬЯ
+                       ЯЯЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЬЯЯ
+
+                        "...the tide is comming in..."
+
+Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я
+                            Йї
+                 ъДДДДДНДНННјАъ ъ Issue  #1 ъ ъїЙНННДНДДДДДъ
+                                               Ај
+Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь
+   
+   ЫЫ ЫЫЫЫ   
+   Ы  Ы ЫЫ   
+   ЫЬЬЫЬЫЫ    
+   ЬЬЬЬЬ                                                              
+       Ы
+      ЫЫ   ъ                            
+   ЬЬЬЬЬ ЪДЩ      GROUP:
+   Ы   Ы А 1 ї...(                     )...
+   ЫЫЫЫЫ Ъ 2 Щ...(                     )...
+   ЬЬЬЬЬ А 3 ї...(                     )...
+   Ы     Ъ 4 Щ...(                     )...
+   ЫЫЫЫЫ А 5 ї...(                     )...
+   ЬЬЬЬЬ Ъ(6)Щ...(                     )...
+     Ы Ы А(7)ї...(                     )...
+     ЫЬЫ Ъ(8)Щ...(                     )...
+     ЯЯЯ А(9)ї...(                     )...
+   Ы ЫЫЫ   ЪДЩ
+   Ы Ы Ы   ъ                                                ЫЫЫЫЫ
+   ЫЫЫ Ы                                                    ЫЫЫ Ы
+                                                            ЫЫЫЬЫЬЬЬ
+     ъ
+   ЪДЩ      DEMO:                        GROUP:             ЫЫЫЫЫ
+   А 1 ї...(                      ).....(              )... Ы Ы Ы
+   Ъ 2 Щ...(                      ).....(              )... Ы ЫЬЫ
+   А 3 ї...(                      ).....(              )...
+   Ъ 4 Щ...(                      ).....(              )... ЫЫЫЫЫ
+   А 5 ї...(                      ).....(              )... ЬЬЬЬЫ
+   Ъ(6)Щ...(                      ).....(              )... ЬЬЬЬЫ
+   А(7)ї...(                      ).....(              )...
+   Ъ(8)Щ...(                      ).....(              )... ЫЫЫЫЫ
+   А(9)ї...(                      ).....(              )... ЫЫЫ Ы
+     ЪДЩ                                                    ЫЫЫЬЫ
+     ъ
+                                                            Ы ЫЫЫ
+   ЫЫЫЫЫ Ы                                                  Ы Ы Ы
+   ЬЬЬЬЬ                                                    ЫЫЫ Ы
+   ЯЯЯЯЫ      ъ
+   ЯЯЯЯЯ    ЪДЩ      INTRO:                       GROUP:
+   ЫЫЫЫЫЫЫ  А 1 ї...(                      ).....(              )...
+   ЫЬЬ Я    Ъ 2 Щ...(                      ).....(              )...
+   ЬЬЬЬЬ    А 3 ї...(                      ).....(              )...
+   ЯЯЯЯЫ    Ъ 4 Щ...(                      ).....(              )...
+      ЯЯ    А 5 ї...(                      ).....(              )...
+   ЫЫЫЫЫ    Ъ(6)Щ...(                      ).....(              )...
+   ЫЬЬЬЫ    А(7)ї...(                      ).....(              )...
+   Ь ЬЬЬ    Ъ(8)Щ...(                      ).....(              )...
+   ЫЬЫЯЫ    А(9)ї...(                      ).....(              )...
+              ЪДЩ
+              ъ
+       ЬЬЬЬЬ ЬЬЬЬЬ ЬЬЬ ЬЬ
+       ЫЫЫ Ь ЫЫЫЬ  ЬЫЫЯЫЬ
+     ъ ЫЫЫЬЫ ЫЫЫ   ЫЫЫ ЫЫ
+   ЪДЩ      GRAPHICIAN/GROUP:
+   А 1 ї...(                           )...
+   Ъ 2 Щ...(                           )...
+   А 3 ї...(                           )...
+   Ъ(4)Щ...(                           )...
+   А(5)ї...(                           )...
+   Ъ(6)Щ...(                           )...
+   А(7)ї...(                           )...
+   Ъ(8)Щ...(                           )...
+   А(9)ї...(                           )...
+     ЪДЩ
+     ъ               ъ
+                   ЪДЩ      MUSICIAN/GROUP:
+                   А 1 ї...(                           )...
+   ЫЫЫЯЫЯЫ ЫЫЫ Ь   Ъ 2 Щ...(                           )...
+   ЫЫЫ   Ы ЫЫЫЬЫ   А 3 ї...(                           )...
+   ЬЬЬЬ ЬЬ ЬЬЬЬЬ   Ъ(4)Щ...(                           )...
+   ЫЬЬЬ ЬЬ ЫЫЫ Ы   А(5)ї...(                           )...
+   ЬЫЫЫ ЫЫ ЫЫЫ Ь   Ъ(6)Щ...(                           )...
+   ЯЯЯЯ ЯЯ ЯЯЯЯЯ   А(7)ї...(                           )...
+                   Ъ(8)Щ...(                           )...
+                   А(9)ї...(                           )...
+                     ЪДЩ
+                     ъ
+     ъ
+   ЪДЩ      CODER/GROUP:                      ЫЫЫЫЫ
+   А 1 ї...(                           )...   ЫЬ ЬЫ
+   Ъ 2 Щ...(                           )...
+   А 3 ї...(                           )...   ЫЫЫЫЫ
+   Ъ(4)Щ...(                           )...   ЫЬЬЬЫ
+   А(5)ї...(                           )...  
+   Ъ(6)Щ...(                           )...   ЫЫЫЫ
+   А(7)ї...(                           )...   ЫЬЬЫЬЬ
+   Ъ(8)Щ...(                           )... 
+   А(9)ї...(                           )...   ЫЫЫЫЫ
+     ЪДЩ                                      Ы ЫЬЫ
+     ъ
+   
+
+               Йї
+    ъДДДДДНДНННјАъ ъ Please remember this while voting: ъ ъїЙНННДНДДДДДъ
+                                                           Ај
+            
+ ъ You are not allowed to vote for yourself, your group, members of your 
+   group or any of your/your groups productions. 
+ ъ One man, one vote.
+ ъ ( ) means that that entry is optional. You don't have to write anything
+   there but please do.
+ ъ Please don't vote "to make friends". People like you anyway! 
+ ъ If you already have filled in a voting-form for some other diskmag, you
+   can just send us that one instead of spending your time filling in this
+   fancy one. :)
+
+Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я
+                         Йї
+              ъДДДДДНДНННјАъ ъ In my opinion...ъ ъїЙНННДНДДДДДъ
+                                                  Ај
+Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь
+   
+   This is where you can tell us what you think about one thing and another.
+   Please write something nice we can quote.
+
+ ъ How do you prefer to get your new sceneproductions?
+   On a disk in an envelope or by modem from a demorelated BBS?
+   Why do you prefer that way?
+
+ ъ In which way will the PCdemos develop most during the next 12 months?
+
+Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я|Я
+                     Йї
+          ъДДДДДНДНННјАъ ъ...and who might you be? ъ ъїЙНННДНДДДДДъ
+                                                      Ај
+Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь
+
+   Your Handle:
+      Group(s):
+   You're into: [ ] Graphics - [ ] Music - [ ] Coding - [ ] _________
+       Country:
+   
+   Thank you participating in the making of the first Tide chart.
+   Please send this votesheet to us, feel free to include any kind of
+   news, adverts, articles or anything else that might cross your mind.
+   See you all in the first issue. Until then... Go with the Tide!
+
+                               ъюъ Mail: ъюъ
+    
+    (Gloom)                      (Mike X)                   (Axon)
+ Bent Stamnes                Michal Karpinski            Tor-Helge Skei
+   Bj›rklia 3        -       Alfheimsvingen 22     -     Flat†stoppen 75
+N-7500 Stj›rdal              N-7026 Trondheim           N-7079 Trondheim
+    Norway                        Norway                     Norway
+
+                               ъюъ Email: ъюъ
+                    
+                        Voting forms - mika@skribenten.bbs.no
+                 General Information - tskei@sn.no
+                       Other matters - gloom@teamnet.no
+
+Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь|Ь
+                                                ...end of file as we know it.

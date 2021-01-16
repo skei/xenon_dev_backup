@@ -1,0 +1,7 @@
+þ 3D engine (9 imul rotation, radix sort, etc)
+þ BumpMapping
+þ Voxel
+þ TextureMapped landScape (Term.Vel. Magic Carpet)
+þ Spacecut
+þ Shadows
+þ Reflection/Mirror

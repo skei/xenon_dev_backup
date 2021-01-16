@@ -1,0 +1,21 @@
+þ 3D objekt roterer, s†, tegnes bakgrunn bak denne, 1 linje pr retrace
+  eller noe (tegnes til bakgrunnsbufferet som kopieres inn ved
+  blanking av buffer)
+
+þ SpaceCut/Z-buffer - "fake" v.hj.a fargen p† pixlen og fargen p†
+  buffer - tegnes bare hvis pixlen er lysere enn bufferet ?
+
+þ Landskap - Terminal Velocity - "old fashion" dot-landscape med
+  texture mapped polygons imellom...
+
+þ Legg inn Z-clipping i 3D rutinene - s† objekter kan komme inn fra Z
+  og inn i skjermen...
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Palette tabeller
+
+1) 256x256 -> for † ADD'e to farge-verdier sammen - glenz med
+   256-palettes
+2) 256xn   -> for shading n antall shade-levels for hver farge
+3) 5x5x5 bits -> for RGB palette
+

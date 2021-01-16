@@ -1,0 +1,41 @@
+MOD-expander
+
+alle samples har fast lengde i _expanded_ form, f.eks 4096 bytes...
+De f›rste bytes i disse samplene har parametre i compressed form, for
+hvordan de skal LAGES v.hj.a sinus, square, sawtooth, noise, etc,
+tabeller...
+
+F.eks:
+
+n antall av: (7?)
+
+db Waveform         ; 0=sine, 1=square, 2=
+db Volume           ; 0-255
+dw TableAdder 8.8   ; adder within relevant table
+db action           ; 0=add, 1=mix, 2=sub, 3=max
+
+4 * 6 = 24 + 4 (ADSR) = 32!
+
+ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД
+F›rst, en MOD Preprocessor, som Erstatter samplene med Parametre
+
+I EXE fila, f›rst lagres MOD'en til fil (eller buffer), deretter g†r
+vi gjennom en og en "sample", henter inn parametrene - LAGER lyden, og
+lagrer den (lengden finnes i MOD headeren)... Etter at alt dette er
+ferdig - s† er MOD'en funksjonibel igjen..
+
+M† ogs† lage en Sample Creator, som bruker samme parametre som
+Creator'en, s† Mikael kan lage samplene f›r han lager MOD'en..
+Ha en eller annen MOD-Project saver, som lagrer info om alle
+parametre, som kan enkelt og greit erstatte samplene :)
+
+ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД
+XPM = Xenon Parameter/Packed Module
+.OBJ fil:
+Proc XPM2MOD
+; In: DS:SI -> XPM
+      ES:DI -> MOD
+
+ДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДДД
+
+

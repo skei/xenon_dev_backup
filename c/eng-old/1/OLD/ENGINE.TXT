@@ -1,0 +1,22 @@
+ToDo/Fix:
+
+"normalizing" transform:
+
+float t90  = tan( NINETY_DEGREES_IN_RADIANS );
+float tfov = tan( FOV_DEGREES_IN_RADIANS );
+x' = x * ( t90/fov );
+y' = y * ( t90/fov );
+
+---
+
+x' = (x*D)/z
+y' = (y*D)/z
+
+D = (ViewPortSize/2*tan(FOV/2));  ... 320x200 screen = D=277; around 70
+degrees ???
+
+
+FOV = ((PI*2)/360)*70
+
+---
+

@@ -1,0 +1,38 @@
+;-----------------------------------------------------------------------------
+; GetPixel - get the pixel color at specified location.
+; In:
+;   ES    - virtual screen segment.
+;   (X,Y) - pixel location.
+; Out:
+;   AL    - pixel color value.
+; Modified:
+;   BX, Flags.
+;-----------------------------------------------------------------------------
+
+GetPixel        macro   X,Y
+
+                mov     bx,Y
+                imul    bx,MAXWIDTH
+                add     bx,X
+                mov     al,es:[bx]
+
+                endm
+
+;-----------------------------------------------------------------------------
+; PutPixel - put the pixel color at specified location.
+; In:
+;   ES    - virtual screen segment.
+;   (X,Y) - pixel location.
+;   AL    - pixel value.
+; Modified:
+;   BX, Flags.
+;-----------------------------------------------------------------------------
+
+PutPixel        macro   X,Y
+
+                mov     bx,Y
+                imul    bx,MAXWIDTH
+                add     bx,X
+                mov     es:[bx],al
+
+                endm

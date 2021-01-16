@@ -1,0 +1,27 @@
+1. Fyll octree
+2. marching cubes
+
+typedef struct sCube
+ {
+  struct sCube SmallerCubes[8];
+  float x1,x2,y1,y2,z1,z2;
+  int IsoValues[8];
+  int status;                     // full, empty or partial
+ }
+
+
+- start med en stor kube som inneholder blob'en
+- kalkul‚r ISO-values for alle 8 hj›rner
+- sub-divid‚r denne kuben
+
+
+void DoCube ( sCube *C )
+{
+ Calc IsoValues For 8 Corners(C);
+ sett opp bitmask for 8 hj›rner
+ sl† opp i marching cubes tabell for † finne hvilke edges som intersectes
+   av blob
+ litt sjekking, sett opp endel verdier (P;F;E)
+ sub-divid‚r kube, kall opp DoCube med mindre cube...
+}
+

@@ -1,0 +1,17 @@
+jumps
+DOSSEG
+MODEL SMALL,pascal
+STACK 400h
+.386
+.data
+.code
+include gfx.inc
+
+START:
+
+ Call InitModex
+
+ mov ax,4c00h
+ int 21h
+
+end start

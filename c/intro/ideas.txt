@@ -1,0 +1,173 @@
+Code  : Axon
+Music : Mike X
+
+MXM player : Pascal/Cubic Team.
+
+- Coded with Watcom C/C++ v11.0
+- DOS Extender. I started with the XIDS extender from Maxwell Sayles, and
+  modified and tweaked it a lot to suit my needs. I changed so much that I
+  think I now can call it my own... DPMI only (CWSDPMI, Win95, etc),
+  extremely small (a couple of 100 bytes). I also added replacement
+  routines for the Watcom standard libraries that I needed...
+- MXM player. Pascal/Cubic Team's player modified for the extender
+- Softsynth. To further reduce the intro size, I coded a small
+  sample-generator, removed the samples from the module, and inserted the
+  parameters for the SoftSynth. These samples are calculated at startup.
+  - additive synthesis
+  - bandpass filter
+  - resonance filter
+  - fourier equalizer
+  - morphing
+- Compression. I used my own packer, based LZARI with some crypting stuff,
+  and also a JPEG-like lossy compressor for some of the true-color images
+- Texture/Gfx Calculation
+- Implicit Surfaces
+- Raytracing. TrueColor raytracing of spheres and planes, shadows,
+  reflections...
+- 3D Engine. Sloppy, old version of 3d engine. The newest version wasn't
+  100% compileable (lots of bugs and error right now), so I used the
+  newest version I could find that compiled without errors.. :-/ Better
+  that nothing...
+- Particle System: Real physics, gravitation, viscous drag (friction),
+  Hooks spring law...
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Some words from Axon:
+
+- Pure and sloppy C code, no optimizations - had no time...
+- Hurried "design" - smashed together a few routines in a few days.
+
+Why is the code so sloppy?
+
+Well, MikeX asked me right before The Gathering 98, if I were interested
+in making a Xenon intro for Bush... I thought: why not? and answered
+yes...
+Because I had a lot of other things to do during the time betwen TG and
+Bush (I were recording my debut CD), almost no new coding were done..  And
+when I finally got the time to sit down and think about design, and what
+kind of routines and parts I wanted in it, I had absolutely NO ideas!
+Yewk.
+Instead of just waiting for the ideas, I started smacking together a few
+routines, just to DO something, and you can see the result yourself...
+
+The 3D "parts" is especially sloppy. I used an older version of the
+engine I'm working on right now.. The newest version is _A_LOT_
+faster, have full 3DS keyframer support, and has quite a lot of bugs
+fixed. But since it's under construction, it doesn't work 100%, so I
+couldn't use that version... :-/
+
+ÄÄÄ
+
+BTW: The "intro" was made on a Cyrix-6x86 P150+, Hercules Dynamite, 1Mb
+GUS No testing on other machines were done :-/ Don't know how it will run
+on 486'es or Intel Pentiums... Don't care either!
+
+I don't know what kind of HW config the compo machine will have either...
+
+If I find the time and motivation needed, I might consider optimizing this
+shit, fixing a few bugs, and release a proper version... Time will
+tell....  I have more "important" things to do too, so...  perhaps...
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+Det som er s† langt i EXE fila:
+
+ş DPMI DOS extender
+ş Support rutiner, som f.eks keyboard, malloc/free, strings, etc...
+ş MXM player (med koden for ALLE effektene...)
+ş VESA 2.0 rutiner (den kj›rer opp 640x480x24 i test exe'n)
+ş en 54K stor XM fil (modul av Fender/Peek)
+ş MPG still frame decoder
+
+Extenderen og MXM playeren kompilert med TASM
+resten i Watcom C
+Linket med TLINK
+pakket med PKLITE (-e)
+
+
+
+"ToDo"
+
+sleng inn andre ting, som f.eks Texture kalkulering, bakgrunn kalkulering,
+objekt kalkulering (Knots, hypertoroid, etc)...
+PAK packer
+
+"Event manager", jeg har denne kj›rende i en eller annen gammel source.
+Gj›r det sinnssykt lett † sette sammen en demo/intro.. Setter opp en liste
+med effekter (med f›lgende: init, start, run, stop, exit).. Og setter opp
+ei liste Med modul-Posisjoner, og hva som skal skje p† de forskjellige
+"event"ene...
+Og man har seff variabler som CurrentModulePos, CurrentEventPos
+
+S†, i l›pet av demo/intro:
+
+ Pos / Time b›r vel v‘re unsigned int, sammensatt av : module-order, row,
+ og timer/ticks....
+
+ pos = GetModulePos();
+ if (pos >= CurrentEvent->Next->Time)
+ {
+  CurrentEvent->End();
+  CurrentEvent = CurrentEvent->Next;
+  CurrentEvent->Start();
+ }
+ else CurrentEvent->Run(/* div variabler, timer, etc her */);
+
+I oppstart av intro/demo, kalles alle rutiners ->Init opp... og ved
+avslutning alle ->Exit..
+
+S†, hver effekt b›r ha noe slikt:
+
+typedef struct sEffect
+ {
+  void (*Init)(void);
+  void (*Start)(void);
+  void (*Run)(int timer):
+  void (*Stop)(void):
+  void (*Exit)(void);
+ } sEffect;
+
+ s† kan kanskje eventlista v‘re:
+
+typedef struct sEventListElement
+ {
+  unsigned int Time;
+  sEffect *
+  struct sEventListElement *Next;
+  }
+
+Nei, n† m† jeg p† fest :)
+Skriver mer her siden...
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Ting som kanskje kan brukes i en intro:
+
+ş Raytraced tunnel, trace hver 8x8 pixel og interpoler
+ş Raytraced planes... Samme, men to eller flere plan..
+ş Raytraced sphere... Kanskje samme her? Trace innsiden av en kule, hver 8
+  eller noe pixel, og tegn... Da kan man rotere den i akke retninger, og
+  bruke som "himmel" eller bakgrunn for andre effekter
+ş Simplifisert engine..... Ikke hierarki, keyframing eller 3ds loading...
+  kun rotering av objekter + kamera.... For † slenge inn objekter som
+  f.eks blobs, etc... Og for † f† inn kalkulerte objekter....
+ş Hvis man f†r ferdig en slik engine, tror jeg nok med 95% sikkerhet at
+  jeg skal rekke † legge inn realtime skygger/spotlights i den.... Vet
+  100% hvordan jeg skal gj›re det, s†....
+  Og kanskje alpha mapping, for † lage noen kule lys-effekter...
+ş Vi m† finne noen kule patterns eller m›nster for blob'ene... Vi kan
+  kanskje sette opp path'en i 3DS, s† kan jeg dumpe 3ds fila (spline'ne)
+  med en dumper jeg har ferdig, og hardkode dem i 3d3 fila.... En enkel
+  spline rutine med x,y,z bare (som Vector-spline i 3ds animasjon) burde
+  v‘re grei nok † lage ferdig....
+ş Samme hvis jeg f†r ferdig ray-tracinga... Da m† vi ha noen path's for
+  spheres'ene... Anim‚r noen kuler i 3ds, og dump spline dataene...
+
+Hva annet kan vi ha med? Hva med den fireworks saken din, Kurt? Kanskje i
+slutten av introen? Med talent logo, eller noe?
+

@@ -1,0 +1,49 @@
+;-----------------------------------------------------------------------------
+; DoEmBoss - Do the EmBoss effect into a 320x200x256 picture.
+; In:
+;  DX - Picture Source Segment.
+;-----------------------------------------------------------------------------
+
+DoEmboss        proc
+
+                pusha
+                push    ds
+
+                mov     ds,dx                   ; DS:SI = source image.
+                xor     si,si
+                xor     cx,cx
+EmBossLine:     push    cx                      ; Y= 0..198
+                xor     bx,bx
+EmBossLoop:     push    bx                      ; X= 0..318
+                add     bx,cx
+                xor     dh,dh
+                mov     dl,[si+bx]
+                mov     ax,dx
+                mov     dl,[si+bx+MAXWIDTH+1]
+                sub     ax,dx
+                mov     dx,DEPTH                ; EmBoss Depth Factor.
+                imul    dx
+                mov     al,ah
+                mov     ah,dl
+                add     ax,BRIGHT
+                cmp     ax,MINGRAY              ; Check Color Range.
+                jge     EmbossHigh
+                mov     ax,MINGRAY
+EmbossHigh:     cmp     ax,MAXGRAY
+                jle     EmbossLow
+                mov     ax,MAXGRAY
+EmbossLow:      mov     [si+bx],al
+                pop     bx
+                inc     bx
+                cmp     bx,MAXWIDTH-2
+                jbe     EmbossLoop
+                pop     cx
+                add     cx,MAXWIDTH
+                cmp     cx,MAXWIDTH*(MAXHEIGHT-2)
+                jbe     EmbossLine
+
+                pop     ds
+                popa
+                ret
+
+DoEmboss        endp

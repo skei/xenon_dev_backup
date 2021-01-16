@@ -1,0 +1,86 @@
+
+invZ = 1/Z;
+invU = U/Z;
+invV = V/Z;
+
+i innerloop, for Ü finne korrekt U og V (hver 8/16 pixel)
+
+realZ = 1/invZ
+realU = InvU * realZ
+realV = invV * realZ
+
+invZ += invZdelta;
+invU += invUdelta;
+invV += invVdelta;
+
+--
+
+prõv Ü kjõr den realZ = 1/invZ for _neste_ span FùR tegning av current
+span..
+
+
+
+
+ realZ = 1/invZ
+
+
+
+ realU = InvU * realZ
+ realV = invV * realZ
+ real
+
+ InnerLoop();
+ invZ += invZdelta;
+ invU += invUdelta;
+ invV += invVdelta;
+
+-----------------------------------------------------------------------------
+
+1. CalkulÇr lengde pÜ lengste linje...
+2. KalkulÇr inv_z, inv_u og inv_v addere for polyet
+3. Beregn buffer like stort som den lengste linja, starter fra (inv_)u/v = 0
+4. i polyfiller:
+   for (i=0 to length)
+   {
+
+-----------------------------------------------------------------------------
+
+// calc inverse
+
+zinv = 1/z
+uinv = u*zinv
+vinv = v*zinv
+
+// start U/V are already known
+
+u1 = u
+v1 = v
+
+// calc end U/V, add adders, inverse
+
+zinv += zadder
+uinv += uadder
+vinv += vadder
+
+zreal = 1/zinv
+u2 = uinv*zreal
+v2 = vinv*zreal
+
+loop:
+
+  zinv += zadder
+  uinv += uadder
+  vinv += vadder
+
+  zreal = 1/zinv
+
+  innerloop()
+
+  u1 = u2
+  v1 = v2
+
+  u2 = uinv*zreal
+  v2 = vinv*zreal
+
+  if spansleft goto loop
+

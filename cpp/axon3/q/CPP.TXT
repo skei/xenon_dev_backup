@@ -1,0 +1,8 @@
+BITMAP
+ - buffer
+ - (pure?) virtual functions for drawing on bitmap
+ - blit to another BITMAP
+
+
+
+

@@ -1,0 +1,29 @@
+.b              EQU     byte ptr
+.w              EQU     word ptr
+.d              EQU     dword ptr
+bptr            EQU     byte ptr
+wptr            EQU     word ptr
+dwptr           EQU     dword ptr
+eol             EQU     13,10,36
+ofs             EQU     offset
+
+errortxt        EQU     '(!)  '
+infotxt         EQU     'ùþù  '
+warntxt         EQU     'ù?ù  '
+
+clr             MACRO   data
+                xor     data,data
+                ENDM
+@setcol         MACRO   col,r,g,b
+                mov     al,col
+		mov	dx,3c8h
+		out	dx,al
+		inc	dx
+                mov     al,r
+		out	dx,al
+                mov     al,g
+		out	dx,al
+                mov     al,b
+		out	dx,al
+		ENDM
+

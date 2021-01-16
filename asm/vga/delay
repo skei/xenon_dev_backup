@@ -1,0 +1,13 @@
+;-----------------------------------------------------------------------------
+; Delay - Sleeps during any amount of time. Uses the VGA Vertical retrace.
+; In:
+;   CX - Number of ticks to speed (ticks at 70Hz).
+;-----------------------------------------------------------------------------
+
+Delay           proc near
+
+DelayLoop:      call    WaitVRT
+                loop    DelayLoop
+                ret
+
+Delay           endp

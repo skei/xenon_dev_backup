@@ -1,0 +1,101 @@
+GfxLab v0.2á - (C) 1995 - Axon/Xenon Development (Tor-Helge Skei)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+First of all, I'm a coder, not a writer, so don't expect too much from
+this DOC file! And, excuse my spelling/grammar errors - I'm from
+Norway! :)
+
+AND: This is NOT a paint program, it's a tool for converting
+traditional bitmap images into something a bit more useful for
+demo/intro purposes... Like grabbing fonts, clipping images, convert
+to RAW, etc, etc....
+
+Let's take it short:
+
+Main Menu
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Press Right mouse button to bring it up. Try the buttons.. Easy to
+understand..
+
+Load Menu
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+This one should be quite easy to understand too..
+Files with the extensions BMP, PCX and GIF are loaded as those
+formats, all others are RAW... Only 320x200 formats supported yet...
+Other formats still load, but.........
+ChDir "remembers" current drive/directory 'til next time the Load Menu is
+entered.
+
+Save Menu
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Almose exactly the same as the Load Menu..
+
+Grab
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Grabs multiple parts of screen into a single file (RAW format)...
+Handy for saving fonts, sprites, etc...
+
+
+Clip
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Clips a rectangular
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+"To do" list:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ş Write a better DOC file :)
+ş Palette editor
+  I have som MAJOR ideas here... Expect to see something never seen
+  before...  and of course all those traditional palette editing
+  functions...
+ş Font/Sprite grabber
+ş A few image manipulation tools, like:
+  - Smooth
+  - Resize
+  - Flip/Mirror
+  - Rotate
+ş Save GIF (working on it)
+ş Speed up loading routines, especially PCX - convert to ASM
+ş Save (and Load?) DB format (goodbye, BIN2DB!)
+ş Some fine-tuning of the GUI. Speeding up a few parts.
+  Adding a few more "objects", moveable, resizeable windows, multiple
+  windows at once... -> Better GUI...
+ş Add some method of running external programs, with VGA-screen (or
+  some buffer) available/accessible, so that other persons can write
+  their own utils for GfxLab.
+  And a menu for these..
+ş Higher resolutions.. Thought about at least 640x480..
+ş Support for planar formats, tweaked and 4-plane modes, save planes
+  separated in RAW & DB..
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Revisions:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+v0.1á
+- First version. Not released. Interface sucked. Only loading &
+  saving, minor palette editor, font/sprite grabber..
+  Sources deleted!
+
+v0.2á
+- New GUI (some optimizations still needed)
+- Loads GIF, BMP, PCX & RAW
+- Saves PCX & RAW
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Comments, ideas, etc.... greatly appreciated..
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Snail:  Tor-Helge Skei
+        Flat†stoppen 75 (sokkel)
+        N-7079 Flat†sen
+        Norway
+
+email:  tskei@sn.no
+
+BBS:    Eldritch BBS (+47 72 58 20 79 : Open: 23:00-07:00 norwegian
+        time!!!!!)... Sysop: Axon :)
+
+Voice:  72 58 20 79 (no foreign callers please...... Can‘t stand
+        talking english through the phone!)
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

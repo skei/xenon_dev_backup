@@ -1,0 +1,51 @@
+# ----------------------------------------------------------------------------
+# RayTracer INITIALIZATIONS
+#   Camera (with three parameters):
+#      CamOrigin: location of camera (or viewplane window origin) in 3D space
+#      ViewRefPt: location of point-of-interest used to defined view direction
+#      ViewUp: 3D vector defining the "UP" vector for the camera
+#   ViewPlaneWindow (with three parameters):
+#      Width of viewplane window in pixels (width of output image)
+#      Height of viewplane window in pixels (height of output image)
+#      ViewerDistance in pixels (eye distance from ViewPlaneWindow)
+# ----------------------------------------------------------------------------
+
+ViewPlaneWindow
+  80 50 400 320 200
+
+Camera
+  100 200 -1500
+  0 0 4000
+	0 1 0
+
+AmbientLightFactor 0.05
+
+
+# ----------------------------------------------------------------------------
+# LIGHT SOURCES
+# PARAMETERS: Location or Direction (x,y,z); Intensity; IsActive
+# ----------------------------------------------------------------------------
+
+NumLightSources 3
+
+LightSource 500 350 1500 1 1
+LightSource 500 0 2000 0.5 1
+LightSource 500 -350 1500 0.3 1
+
+
+# ----------------------------------------------------------------------------
+# OBJECTS
+# PLANE PARAMETERS: NORMALIZED RGB COLOR; IsActive FLAG
+#                   Plane Normal (x,y,z); -Direction along normal to plane
+# SPHERE PARAMETERS: NORMALIZED RGB COLOR; IsActive FLAG
+#                    Center (x,y,z); Radius
+# ----------------------------------------------------------------------------
+
+NumObjects 2
+
+Sphere 1.0 0.0 0.0  1     0    0 2000   200
+#Sphere 0.0 1.0 0.0  1   600 -400 2000   200
+#Sphere 0.0 0.0 1.0  1  -600  400 2000   200
+#Sphere 1.0 1.0 1.0  1  -600 -400 2000   200
+Sphere 1.0 1.0 1.0  1   600  400 2000   200
+

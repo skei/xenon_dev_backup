@@ -1,0 +1,87 @@
+;-----------------------------------------------------------------------------
+; BlackPalette - Set a Black Palette.
+;-----------------------------------------------------------------------------
+
+BlackPalette    proc near
+
+                call    WaitVRT
+                mov     dx,3C8h
+                xor     al,al
+                out     dx,al
+                inc     dx
+                mov     cx,768
+BlackLoop:      out     dx,al
+                loop    BlackLoop
+                ret
+
+BlackPalette    endp
+
+
+;-----------------------------------------------------------------------------
+; SetPalette - Sets the Color Palette.
+;-----------------------------------------------------------------------------
+
+SetPalette      proc near
+
+                call    WaitVRT
+                mov     dx,3C8h
+                xor     al,al
+                out     dx,al
+                inc     dx
+                lea     si,[Palette]
+                mov     cx,768
+                rep     outsb
+                ret
+
+SetPalette      endp
+
+;-----------------------------------------------------------------------------
+; FadeInPalette - Fade-In the palette.
+;-----------------------------------------------------------------------------
+
+FadeInPalette   proc near
+
+                xor     bx,bx
+FadeInLoop:     lea     si,[Palette]
+                mov     dx,3C8h
+                xor     al,al
+                out     dx,al
+                mov     cx,768
+                call    WaitVRT
+                mov     dx,3C9h
+FadeIn:         lodsb
+                mul     bl
+                mov     al,ah
+                out     dx,al
+                loop    FadeIn
+                add     bl,4
+                jnc     FadeInLoop
+                ret
+
+FadeInPalette   endp
+
+
+;-----------------------------------------------------------------------------
+; FadeOutPalette - Fade-Out the palette.
+;-----------------------------------------------------------------------------
+
+FadeOutPalette  proc near
+
+                mov     bl,252
+FadeOutLoop:    call    WaitVRT
+                mov     dx,3C8h
+                xor     al,al
+                out     dx,al
+                inc     dx
+                lea     si,[Palette]
+                mov     cx,768
+FadeOut:        lodsb
+                mul     bl
+                mov     al,ah
+                out     dx,al
+                loop    FadeOut
+                sub     bl,4
+                jnc     FadeOutLoop
+                ret
+
+FadeOutPalette  endp

@@ -1,0 +1,4 @@
+- Optimize polys
+- Fix bounding sphere tests
+- Z-clipping
+- Spline/keyframer

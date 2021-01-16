@@ -1,0 +1,144 @@
+Design
+------
+
+Level Description
+
+1     Helt bunn niv†. fylling av 2d buffer...
+      Vi har et buffer, og metoder for † modifisere dette... Vi deler opp
+      bufferet i 2d linjer (horisontale), og har metoder for † modifisere
+      dette... HorizLine, HorizLineTexture, etc...
+      Ting som vi kan gjenbruke fra f.eke en polyfiller til en
+      zoom-rutine, eller interpolering av data generelt, etc...
+
+2     Bruk av primitives i L1 til † konstruere h›yere objekter, som
+      Texture-polygon... For † lage nye poly-fillere legger vi til en her,
+      som kun bruker L1 primitiver... Derfor m† L1 primitivene ha alt man
+      trenger for † lage hva som helst...
+
+3     Tillegg: 3D... Vi har en tScene her... Og alt som kan gj›res med
+      den...
+
+      Her kommer animasjon inn... Modifisering av MIDDLE's tScene.
+      Keyframing, hierarki
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Hmmm... Hva om vi kunne lage noe LowLevel rutiner som kan gjenbrukes i
+massevis... Line‘r interpolering av forskjellige data-st›rrelse or
+mengder, og lagre disse dataene i definerte buffere???
+Hmmm... I s† fall m† f.eks Color og Z i z-buffered gouraud lagres i
+separate bufre... (Det b›r de vel gj›re uansett da... :)
+Men, hva med U og V og C og Z... Er det noen fordeler † ha U og V i
+separat buffer, og ha en egen rutine som interpolerer disse?...
+
+Bakdel er flere memory accesser.. Man skal jo skrive til buffer.. For
+senere † lese det igjen for † bruke dataen til et eller annet...
+Og s† m† en tredje rutine kalles opp for † bruke dataene, hvis dataen som
+interpoleres i seg selv ikke er nok...
+F.eks TextureMapping... Da har vi to verdier † interpolere U/V... Som
+skrives til buffer... Deretter leses dette bufferet, og resultat av noe
+prosessering skal skrives til et nytt buffer...
+
+Ja, faen, ha primitiver som f.eks ZBufferSquare... Med et bitmap som
+definerer Zbuffer som skal fylles inn... Da kan vi lage helt sprengte
+ting.... Men, kanskje ikke ha s† generelle rutiner som definert over... Ha
+heller, ZTexGour for Z-buffered, textured, gouraud shaded horizontal
+line... Vi trenger ikke s† mange for † lage alle poly-typer... Og litt
+#define og s†nt i source filene, s† kan vi gjenbruke stuff...
+Kan bruke disse funksjonene konstruktivt i andre rutiner? Som † z-bufre en
+bakke... Fylle z-buffer for Voxel, og mye annet rart... ???
+
+typedef struct ZbufLine
+ {
+  int min,max
+  WORD *zbuffer[X-SIZE]
+ }
+
+Hadde paset s† perfekt godt i C++.. Men, da blir det sikkert problemer med
+Introer, etc... ??? Siden de har egen extender, etc..
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ShadeTable...
+
+3 tabeller... hver med 256 dwords...
+En hver for rgb... f.eks R›d... Den er shadet fra 0..64, og bit-shiftet
+til riktig plass...
+S† vi tar enkelt:
+color =     RedShade(shade*256+red)
+        + GreenShade(shade*256+green)
+        +  BlueShade(shade*256+blue)
+
+Eller skal vi ha dwords direkte?
+S† hvis vi finner Shade, kan vi sl† opp p† samme plass i b†de Red, Green
+og Blue? Nei, rgb, er forskjellig
+
+Bruk den alpha-mapping saken jeg har fra f›r... Den alpha-mapper jo mellom
+to 16-bits farger... For shading interpolerer vi mellom svart og fargen,
+eller vi kan ha en 64-entries shadetable, med 16-bits farger. S† kan vi
+alpha-mappe mellom denne fargen og fargen som skal shades...
+
+Ved hjelp av denne tabellen, kan vi Shade, Alpha, og filtering... Vi har
+32 toner mellom to farger, greit for interpolering! Bilinear filtering. Vi
+har farge 1 og farge 2, og komma-tall mellom fargene (U,V)
+
+Skal vi se. Det vi trenger † gj›re med farger:
+
+Add   a,b   ; pluss sammen rgb fargene. Litt stress for f.eks 15-16 bits
+              mode pga wrapping... Men, hvis vi klarer † konvertere den
+              15-bits shadetable til 24-bits, kan vi bruke den "Add with
+              255 saturation" fra en code-doc jeg har en eller annen plas
+              (ogs† p† papir)
+
+Mix   a,b   ; Alpha med 50% hver farge
+
+Alpha a,b,v ; Alpha med v
+
+Shade a,v   ; Sl† opp i shadetable
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Layer 1. THE BASIC LEVEL
+  The lowest level: span rendering code.
+  This code does nothing more than sending pixels to the screen for a
+  single polygon span
+
+Layer 2. RASTERIZATION LEVEL
+  Takes care of all algorithmic optimizations of the rasterization
+  process.  It's still very 'black box' like, but it does a bit more than
+  level one.  This level typically contains z-buffering and s-buffering
+  code. You can send polygons to this level.
+
+Layer 3. BASIC GEOMETRY LEVEL
+  This level does basic culling, 2D clipping, frustum clipping, ISO
+  surfaces and so on. Basically you can still send polygons to this level
+  directly, but they will be processed and possibly be send to level 2.
+  This level works heavily together with level 1 to get polygons to the
+  screen as quickly as possible.
+
+Layer 4. ADVANCED GEOMETRY LEVEL
+  This level does more advanced culling of polygons. You can send a scene
+  to this level, and it will be split into polygons, wich will then be
+  send to the lower levels. This level typically contains code like a
+  portal engine or a BSP renderer. This level would also contain lightning
+  stuff.  This level doesn't care if polygons overlap or are off-screen,
+  it simply tries to reduce the total number of polygons and hands them
+  over to level 3.
+
+Layer 5. DYNAMIC GEOMETRY LEVEL
+  This level maintains the factor 'time'. It does animation, object
+  hierarchy management, possibly collision detection and so on. This level
+  doesn't care how the geometry is finally rasterized. It just hands a
+  single frame to level 4.
+
+Layer 6. APPLICATION LEVEL
+  This is the application that uses the 3D engine.
+
+In this model, it is quite easy to replace each layer by a more advanced
+one, or by a layer module that better suits the case of 'layer 6'. When a
+low layer improves, the entire engine gets faster. When the lowest two
+layers are replaced by hardware acceleration code, the higher layers won't
+mind.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+

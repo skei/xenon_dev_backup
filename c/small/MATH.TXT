@@ -1,0 +1,25 @@
+Vektor
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Vektor fra A (Ax,Ay,Az) til B (Bx,By,Bz) = (Bx-Ax,By-Ay,Bz-Az)
+Start-punktet trekkes fra slutt-punktet...
+
+Vektor-lengde = sqrt( x^2 + y^2 + z^2 ).
+  Det samme som distansen mellom vektor og origo
+
+Normalisere vektor: del hvert element (x,y,z) med lengde
+
+Dot-produkt (eller skalar produkt) = Ax*Bx + Ay*By + Az*Bz
+  som indikerer vinkelen mellom vektorene
+
+Cross-prod: ( Ay*Bz-By*Az , Az*Bx-Bz*Ax , Ax*By-Bx*Ay )
+  Vi f†r en vektor som er "perpendicular"... (90ø mot begge...)
+
+Matriser
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Addition: Pluss sammen alle elementer...
+
+
+
+

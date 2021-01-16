@@ -1,0 +1,18 @@
+;-----------------------------------------------------------------------------
+; SetPalette - set the CX entries of the VGA color palette.
+; In:
+;   DS:SI - Palette structure address.
+;   CX    - Number of colors components.
+;-----------------------------------------------------------------------------
+
+SetPalette      proc near
+
+                call    WaitVRT
+                mov     dx,3C8h
+                xor     al,al
+                out     dx,al
+                inc     dx
+                rep     outsb
+                ret
+
+SetPalette      endp

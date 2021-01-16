@@ -1,0 +1,16 @@
+A3D file format:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+int header 'A3D0' Axon 3Dfile format v0...
+int n0 = number_of_objects_in_file
+n0 * ³ int object_type (child or branch object)
+     ³ int obj_pos_x, obj_pos_y, obj_pos_z
+     ³ int obj_rot_x, obj_rot_y, obj_rot_z
+     ³ int bounding_box_radius
+     ³ int n1 = number_of_vertices_in_object
+     ³ n1 * ³ short int vertex_x, vertex_y, vertex_z
+     ³      ³ short int vertex_u, vertex_v
+     ³ int n2 = Number_of_groups_in_object
+     ³ n2 * ³ int n3 = number_of_polygons_in_group
+     ³      ³ n3 * ³ int polygon_a, polygon_b, polygon_c
+

@@ -1,0 +1,15 @@
+You are now entering ... "Sector Vector"
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+You will hate this!
+
+- Bakgrunner:
+  WobbleTunell, Tunell (moving), RotoZoom (bare Roto), BitMap
+
+- Svart, hvitt... Dithered PhongMap, kanskje 640x480 ? Flash, og
+  inverst
+- To objekter snurrer p† samme plass... Z-buffer... Objektene ›ker og
+  minsker i st›rrelse uavhengig....
+- ZBuffer, men bruk gjennomsnitt, minste og/eller st›rste istedenfor
+  vanlig.
+
+

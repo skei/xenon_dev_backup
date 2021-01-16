@@ -1,0 +1,19 @@
+;-----------------------------------------------------------------------------
+; Random - Returns a random number of 16 bits, modified version of the
+;  ripped System unit random routine of the Borland Pascal 7.0.
+; Out:
+;  AX - random value.
+; Modified:
+;  AX, DX, Flags.
+;-----------------------------------------------------------------------------
+
+Random          proc near
+
+                mov     ax,[RandSeed]
+                mov     dx,8405h
+                mul     dx
+                inc     ax
+                mov     [RandSeed],ax
+                ret
+
+Random          endp

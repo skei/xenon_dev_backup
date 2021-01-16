@@ -1,0 +1,850 @@
+Axon's Ray Tracer (ART)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Optimizations & Ideas
+
+1. Hvis vi har et ViewSpace, og vi transformerer alle objekter hit f›r
+   tracing, og lar kamera v‘re i f.eks 0,0,0, eller ihvertfall en
+   konstant, kan vi prekalkulere Ray/View Direction for hver pixel. Vi har
+   et buffer f.eks 320x200 med normaliserte vektorer...
+
+2. Coherence... Hvis vi har bare spheres, etc, og vi tracer fra left til
+   right: Hver sphere kan ha et flag eller noe slikt, LastRayHit...  Tenk
+   oss spheres som sirkler p† 2D skjerm... Mens vi g†r fra left til right,
+   vet vi n†r vi "entrer" en sphere, og sannsynligvis kommer neste pixel
+   ogs† til † treffe samme sphere..  I tillegg, hvis vi Z-sorterer
+   spheres, og vi ikke tillater overlapping av spheres, trenger vi bare
+   sjekke den spheren som er n‘rmest..
+
+   Hmmm, men hvordan kan vi vite om en ny sphere blir truffet.. Vi m†
+   teste alle uansett... Men vi vet hvilke som ble truffet forrige gang...
+   Kanskje ikke s† mye vits???
+
+3. Z-buffer f›rst, med f.eks Object Pointer ellre noe slikt. I projekterer
+   til 2d, fyller dette z-bufferet (tegner sirkler)..  N† vet vi hvilken
+   sphere som treffes, og hvilken som er n‘rmest, etc...
+
+4. Shadows. Hold rede p† LastShadowHit for hvert objekt. Test denne f›rst,
+   og hvis frmdeles In Shadow, shadow...
+
+5. Transparente objekter i Shadows... Test alle non-transparente objekter
+   f›rst. Ta vare p† alle transparente, og ttest disse kun hvis ingen
+   andre solide objekter blokkerer lys...
+
+6. Ikke kalkuler normaler for hver intersection... kun for den vi bruker
+
+7. 2D bounding boxes for hvert objekt???
+
+8. G†r det an † projektere alle spheres etc til en kule, og teste mot
+   denne... ?  Hva med † projektere alle objekter rundt et lys til en
+   sphere rundt lyset. Spherical coordinates... Z-buffer ogs†... N†r vi
+   skal teste shadows, sender vi en ray fra lys mot punkt som skal testes,
+   hvis u/v map/spherical/whatever projeksjon viser at dette objektet
+   "ser" lyset (er fremst i map), er den "not in shadow".. ellers er den
+   "shadowed"
+
+9. Shadows... Vi lager ray fra Intersection point til Light-source. S†
+   sjekker vi intersection mot alle objekter i scene. Hvis ray treffer
+   noen av dem p† veien mot lys, er intersection point in shadow. t m†
+   v‘re mellom 0 og (distance from point to sphere)...  Kan vi
+   prekalkulere denne distansen p† forh†nd for alle spheres? Nei, vi vet
+   jo ikke HVOR p† sphere intersection treffer. Eller kan vi bruke
+   distance fra light til center of sphere?
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Texture mapping a sphere
+
+  Note: p = Pi = 3.141592.
+  Define q as the angle from the X axis (0 <= q <= 2p) and f as the angle
+  from the Z axis (0.0 <= f <= p).
+  Then the equation for a sphere:
+
+  X = R sin (f) * cos (q)
+    = R sin (pv) * cos (2pu)
+    where f/p = v (0.0 <= v <= 1.0)
+  Y = R sin (f) * sin (q)
+    = R sin (pv) * sin (2pu)
+      where q/2p = u (0.0 <= u <= 1.0))
+  Z = R cos (f)
+    = R cos (pv)
+
+  From the equation for Z we get: v = f/p = arccos (Z/R) / p
+  From the equation for X we get: u = [arccos ( X/R sin (pv) ) ] / 2p
+  Note: q = arccos x => x = cos q
+  So if we know the point on the surface, X, Y, Z, then we can compute the
+  point in U,V, texture space.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+> I was wondering what a good way is to calculate the direction of each
+> ray for ray tracing a scene given an eyepoint, eye direction, and field
+> of view angle. Any help would be appreciated. Thanks.
+
+  There is actually a better way of doing this, that can take into account
+aspect ratio and fields of view prior to actually computing the ray
+direction (the speedup in this routine are generally not that noticeable,
+but it is nice to have something elegant!).
+
+  The first step is to compute two vectors, one in the direction of
+increasing x coordinates for the image, and one for increasing y coords,
+that are scaled to be the length of a pixel in each respective direction
+(aspect ratio calcs go in here). Then compute a vector that points towards
+the upper left corner of the screen (I will give pseudo code later).
+
+  When you have this information, you can quickly create any ray to fire
+by simply adding appropriately scaled versions of the x and y direction
+vectors to the vector pointing to the first pixel (of course you want to
+normalise the final vector :-):
+
+PreProcessing stage:
+  xdir = (2 * lookDistance * tan(hfov / 2)) / xres
+  ydir = (2 * lookDistance * tan(vfov / 2)) / yres
+  ydir *= aspect // Adjust y pixel size given aspect ratio
+  LLdir = camera.dir - (xdir * xres)/2 - (ydir * yres)/2
+Computing the ray to fire:
+  dir = LLdir + xdir * x + ydir * y
+  dir = dir normalised
+
+and you are done - not rotations, just simply vector additions and scales
+(this is almost directly taken from my C++ ray tracer).
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Algebraic sufaces are nasty shapes. They're kind of slow, and they suffer
+from surface acne: Rays P + t*D spawned off an algebraic, always have an
+intersection at t = 0. Due to numerical inaccuracies, we often find t
+which are small, but bigger than our current tolerance. This produces
+phantom shadows, digital zits and and more unwanted effects.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Shadow Caching Observation, by Han-Wen Nienhuys (hanwen@stack.urc.tue.nl)
+
+Shadow caching is a useful way for quickly determining whether an
+intersection will be in a shadow. This is the idea: one object that blocks
+light is enough to have a shadow at an intersection point. So each time
+you find an object that blocks a ray, store it, and test this object the
+first thing at the next shadowray. Because second level rays are different
+from first level rays, the shadow rays spawned off their intersection
+point are different. Therefore it seems a good idea to have a cache for
+each recursion level and each lightsource.
+
+On the other hand, a quick survey of the raytracers on my harddisk
+revealed that PoV and Rayshade cache only one object per lightsource. MTV
+and Art have a cache for each level. Nobody seems do make a distinction
+between reflected and refracted rays. Let me explain: if a recursion-level
+1 intersection could be from an eyeray that is refracted, or an eyeray
+which has been reflected. Since the reflected and refracted rays will have
+entirely different directions, their respective intersection points, and
+hence the blocking objects for a given lightsource, will usually be
+different.
+
+The solution: instead of passing the recursion depth to the recursive
+function trace(), pass a tree, which looks like:
+
+struct Tree
+ {
+  struct Tree *reflect_tree, reflact_tree;
+  int recursion;
+  object **shadow_cache
+ }
+
+shadow_cache is an array with a pointer to the last blocking object for
+each lightsource.
+
+shade (Tree *t, ...)
+{
+ if (reflection)
+ {
+  [set up reflection ray]
+  color = trace (t->reflected, ...);
+ }
+}
+
+I've implemented this in Rayce, and for scenes with both refraction and
+reflection, it doubles the number of cache hits.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+  Two comments. First of all, I don't hard code any "maximum level" for
+rays; rather, I maintain a fraction for each ray, indicating its
+contribution to the intensity (color, whatever) assigned to the root ray.
+Recursion stops when this fraction falls below one bit of intensity in the
+final color. I suppose this is still a hard limit in one sense, but it
+allows as many reflections/refractions as necessary to obtain this
+approximation of the root ray's color. It also has the nice property that
+reflected/refracted rays which don't contribute much can be solved without
+recursing to a hard maximum level. Although this could just as easily be
+done with the maximum level approach, my method provides this without any
+additional complexity.
+  However, this method can still lead to infinite total internal
+reflection.  To combat that problem, rays are attenuated based upon the
+distance they travel through any transparent (or translucent) media. This
+attenuation is based upon the physical characteristics of the media in
+question (exponential decay for non-conductors, different for conductors
+because the index of refraction is complex for an electrically conductive
+medium; I think there is another thread around here discussing this very
+point). Such attenuation is in addition to the typical division of energy
+performed between reflected and refracted rays.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Speed-up #3: When shadow testing, keep the opaque object (if any) which
+shadowed each light for each ray-tree node. Try these objects immediately
+during the next shadow testing at that ray-tree node. Odds are that
+whatever shadowed your last intersection point will shadow again. If the
+object is hit you can immediately stop testing because the light is not
+seen.
+
+Speed-up #4: When shadow testing, save transparent objects for later
+intersection. Only if no opaque object is hit should the transparent
+objects be tested.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+I've come up with a fast approximation to 3D Euclidean distance
+(sqrt(dx*dx+dy*dy+dz*dz)). It's probably not original, but .....
+
+1) find these 3 values: abs(dx), abs(dy), abs(dz).
+2) Sort them (3 compares, 0-3 swaps)
+3) Approx E.D. = max + (1/4)med + (1/4)min. (error: +/- 13%)
+
+max +  (5/16)med + (1/4)min has  9% error.
+max + (11/32)med + (1/4)min has  8% error.
+
+As you can see, only shifts & adds are used, and it can be done with
+integer arithmetic. It could be used in ray tracing as a preliminary test
+before using the exact form.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+The nice thing about superquadrics is that a wide range of shapes can be
+represented by varying only two parameters - e1 and e2. Cubes, cylinders,
+spheres, octahedrons, and double-ended cones are all special cases of a
+superquadric. All of the intermediate shapes are also available.
+
+...
+
+where e1, e2, u, and v are as before and a1, a2, a3 are the scale factors
+for the x,y, and z dimensions of the SQ. Unfortunately, both these
+equations require knowledge of u and v, which is not available for
+ray-tracing algorithms.
+A more useful formulation is the implicit equation for superquadrics:
+
+F(x,y,z) = ((x/a1)^(2/e1) + (y/a2)^(2/e2))^(e2/e1) + (z/a3)^(2/e1)
+                      ^^ error, should be e2....
+
+(Note that if e1=e2=0, this degenerates to the implicit equation for a
+sphere.) This equation is for a superquadric centered at the origin, use
+standard transformations to translate and rotate it into world
+coordinates.  If the point (x,y,z) is on the surface of the SQ, F=1. If
+(x,y,z) is inside the SQ surface, F < 1. If (x,y,z) is outside the SQ
+surface, F > 1.
+
+This is Franc's PhD dissertation, so it should also be available from
+University Microfilms. The results of the normal vector derivation are:
+
+   nx = 1/x [1-(z/a3)^(2/e1)][(x*a2/y*a1)^(2/e2) / (1+(x*a2/y*a1)^(2/e2))]
+   ny = 1/y [1-(z/a3)^(2/e1)][ 1 / (1+(x*a2/y*a1)^(2/e2))]
+   nz = 1/z (z/a3)^(2/e1)
+
+For simplicity, we can pretend that a1 = a2 = a3 = 1.0. (These scale in
+each of the 3 directions, and we can handle that easier with
+transformation matrices, which we would need to have to rotate these
+anyway, so no loss)
+
+F(x, y, z) = (x^(2/e2) + y^(2/e2))^(e2/e1) + z^(2/e1)
+
+If F(x,y,z) < 1.0, then we are inside the super quadric, else we are
+outside. So, the algorithm runs as follows:
+
+1: determine the ray closest approach to the origin.  call this point xc,
+   yc, zc
+2: if F(xc, yc, zc) is < 1.0, then you have a guaranteed hit, because xc,
+   yc, zc is inside the quadric, and your eye is "outside".
+3: because you know have a inside point and an outside point, and you know
+   there is a single root in between, you can find it quite easily by
+   binary searching.  Half the interval, check to see whether the midpoint
+   is inside or outside, and collapse the other interval until some
+   closeness criteria is met.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+C Code for Intersecting Quadrics, by Prem Subrahmanyam
+
+Here is the code I wrote in C for doing 3-dimensional quadratics. The
+derivations are rather complex, so I tried to comment the code as best I
+could, but that's all I could do. I hope people find this interesting.
+
+--
+
+#define TINY (float)1e-3
+
+int hitconic(offset,eye,v,p,t,a,b,c,d,e,f,g,start,stop)
+
+ /*
+ offset        the triple representing where the conic is to be moved from
+               0,0,0.
+
+ eye, v        the ray, with eye being the start point and v being the
+               direction vector
+
+ p             is the point into which the intersection point value will
+               be copied
+
+ t             is the value into which the line parameter will be copied
+               for the ray.
+
+a,b,c,d,e,f,g  are values for the 3-dimensional quadratic equation
+               a*xı + b*yı + c*zı + d*x + e*y + f*z = g
+
+start & stop   the bounds (when the equation is centered at 0,0,0) in
+               which to test the conic
+
+example        if the bound around a conic were set at -1,-1,-1 to 1,1,1
+               and the offset was 4,5,6 then the actual spatial extent of
+               the object would be from 3,4,5 to 5,6,7 .
+               So, the conic (3-d quadratic) should contain within its own
+               data structure the offset, extent values (start,stop), and
+               a,b,c,d,e,f,g constants
+
+ vector  offset,eye,v,p;
+ float  *t,a,b,c,d,e,f,g;
+ vector  start,stop;
+ {
+  // *************************************************
+  // * this code is a little messy, but it does work *
+  // *************************************************
+
+  /* create some local points to use in testing */
+  vector m,p2;
+  float radical,Ay,Be,Ce,t1,t2; /* constants for quadratic formula */
+  /* generated for solving for the intersection of the equations for
+     the line and the equation for the quadratic */
+  /* subtract offset from the ray start position to align ray and
+     quadratic*/
+  m[0] = eye[0] - offset[0];
+  m[1] = eye[1] - offset[1];
+  m[2] = eye[2] - offset[2];
+  /* Now, using the constant values, create values for the intersection
+     test formula */
+  Ay = (a*v[0]*v[0]) + (b*v[1]*v[1]) + (c*v[2]*v[2]);
+  Be = (2*a*m[0]*v[0]) + (2*b*m[1]*v[1]) + (2*c*m[2]*v[2]) +
+       (d*v[0]) + (e*v[1]) + (f*v[2]);
+  Ce = (a*m[0]*m[0]) + (b*m[1]*m[1]) + (c*m[2]*m[2]) +
+       (d*m[0]) + (e*m[1]) + (f*m[2]) - g;
+  radical = ((Be*Be) - (4*Ay*Ce));
+  if (radical < 0.0) return FALSE;
+  t1 = ((-1*Be) + sqrt(radical))/(2*Ay);
+  t2 = ((-1*Be) - sqrt(radical))/(2*Ay);
+  /* immediately eliminate cases in which return is false */
+  if (((t1 < 0)&&(t2 < 0))||
+      ((t1 < 0)&&(fabs(t2) < TINY))||
+      ((t2 < 0)&&(fabs(t1) < TINY))||
+      ((fabs(t1) < TINY)&&(fabs(t2) < TINY))) return FALSE;
+  else
+  {
+   /* t1 a bad parameter, but t2 may not be */
+   if ((t1 < 0)||(fabs(t1) < TINY))
+   {
+    if (!(fabs(t2) < TINY)) /* prevent spurious self-shadowing */
+    {
+     /* using the parameter, find the point of intersection */
+     p[0] = m[0] + v[0]*t2;
+     p[1] = m[1] + v[1]*t2;
+     p[2] = m[2] + v[2]*t2;
+     /* test to see if the point is within the bounds for the
+        quadratic section */
+     if ((start[0] <= p[0])&&
+         (stop[0]  >= p[0])&&
+         (start[1] <= p[1])&&
+         (stop[1]  >= p[1])&&
+         (start[2] <= p[2])&&
+         (stop[2]  >= p[2]))
+     {
+      /* if it lies within the bounds, add offset back on and return
+         point */
+      p[0] = p[0] + offset[0];
+      p[1] = p[1] + offset[1];
+      p[2] = p[2] + offset[2];
+      *t = t2;
+      return TRUE;
+     }
+     else return FALSE; /* point does not lie within the bounds */
+    }
+    else return FALSE; /* t2 a bad parameter as well */
+   }
+   if ((t2 < 0)||(fabs(t2) < TINY))
+   {
+    /* t2 a false parameter, so test to see if t1 is good */
+    if(!(fabs(t1) < TINY))
+    {
+     /* find point by parameter */
+     p[0] = m[0] + v[0]*t1;
+     p[1] = m[1] + v[1]*t1;
+     p[2] = m[2] + v[2]*t1;
+     if ((start[0] <= p[0])&&
+         (stop[0] >= p[0])&&
+         (start[1] <= p[1])&&
+         (stop[1] >= p[1])&&
+         (start[2] <= p[2])&&
+         (stop[2] >=p[2]))
+     {
+      /* same as above, see if point lies within bounds */
+      p[0] = p[0] + offset[0];
+      p[1] = p[1] + offset[1];
+      p[2] = p[2] + offset[2];
+      *t = t1;
+      return TRUE;
+     }
+     else return FALSE;
+    }
+    else return FALSE;
+   }
+   /* if the program has gotten here, t1 and t2 are greater than 0 */
+   /* and greater than TINY */
+   p[0] = m[0] + v[0]*t1;
+   p[1] = m[1] + v[1]*t1;
+   p[2] = m[2] + v[2]*t1;
+   p2[0] = m[0] + v[0]*t2;
+   p2[1] = m[1] + v[1]*t2;
+   p2[2] = m[2] + v[2]*t2;
+
+         /* see if the first point is within bounds */
+         if ((start[0] <= p[0])&&
+             (stop[0] >= p[0])&&
+             (start[1] <= p[1])&&
+             (stop[1] >= p[1])&&
+             (start[2] <= p[2])&&
+             (stop[2] >=p[2]))
+         { /* now, see if second point is as well */
+             if ((start[0] <= p2[0])&&
+                 (stop[0] >= p2[0])&&
+                 (start[1] <= p2[1])&&
+                 (stop[1] >= p2[1])&&
+                 (start[2] <= p2[2])&&
+                 (stop[2] >=p2[2]))
+             {  /* both points are within bbox */
+                if (t1 <= t2) /*see which one is smaller */
+                { /* t1 yields a closer point */
+                    *t = t1;
+                    p[0] = p[0] + offset[0];
+                    p[1] = p[1] + offset[1];
+                    p[2] = p[2] + offset[2];
+                    return TRUE;
+                } else {
+                 /* t2 yields a closer point */
+                    *t = t2;
+                    p[0] = p2[0] + offset[0];
+                    p[1] = p2[1] + offset[1];
+                    p[2] = p2[2] + offset[2];
+                    return TRUE;
+                }
+             } else { /* second point not within box */
+                *t = t1;
+                p[0] = p[0] + offset[0];
+                p[1] = p[1] + offset[1];
+                p[2] = p[2] + offset[2];
+                return TRUE;
+             }
+         } else { /* t1 not within bbox */
+            if ((start[0] <= p2[0])&&
+                (stop[0] >= p2[0])&&
+                (start[1] <= p2[1])&&
+                (stop[1] >= p2[1])&&
+                (start[2] <= p2[2])&&
+                (stop[2] >=p2[2]))
+            { /* see if t2 is within bbox */
+                *t = t2;
+                p[0] = p2[0] + offset[0];
+                p[1] = p2[1] + offset[1];
+                p[2] = p2[2] + offset[2];
+                return TRUE;
+            } else { /* neither is within bounding box */
+                return FALSE;
+            }
+        }
+      }
+ }
+
+/* HERE IS THE PORTION OF THE CODE THAT RETURNS THE NORMAL TO THE QUADRATIC */
+
+void findnormal(np,p,n)
+   node       *np;
+   vector       p,
+       n;
+/* np is the pointer to the object node, p is the point of intersection,
+   and n is the normal vector returned */
+  {
+    vector point;
+    switch (np->kind) {
+       /* conic section a la Prem */
+       case CONIC    : point[0] = p[0] - cptr(np)->offset[0];
+                       point[1] = p[1] - cptr(np)->offset[1];
+                       point[2] = p[2] - cptr(np)->offset[2];
+                       n[0] = 2.0*cptr(np)->a*point[0] + cptr(np)->d;
+                       n[1] = 2.0*cptr(np)->b*point[1] + cptr(np)->e;
+                       n[2] = 2.0*cptr(np)->c*point[2] + cptr(np)->f;
+                       normalize(n);
+                       break;
+       }
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+What is Ray-Tracer Acne (RTA) ?
+-----------------------------
+
+As defined by Eric Haines in an early Ray-Tracing News, RTA is those black
+dots that appear sometimes on a ray-traced image. RTA can result from two
+different phenomena:
+
+Case 1: When a ray intersects a surface S, some floating round-off can
+bring the intersected point P inside the surface (Figure 1). So, when a
+reflected ray or a light ray is shoot from P, it will intersect S and P
+will be in shadow.
+
+A common solution to this problem is to let some tolerance (T) for the
+inter- section test: when an intersection point M is found, the distance D
+between the origin of the ray and M is computed, and compared to T, the
+point is rejected if D < T. The problem with that method is that T is an
+absolute value, coded in the source code and sometimes not adapted for a
+specific scene. A solution could be to scale T by the global diameter of
+the scene but there will still be some scene for which it wouldn't work
+(for instance, a scene will very big and very small sphere).
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        PLATONIC SOLIDS
+                (regular and quasi-regular variety,
+                Kepler-Poinset star solids omitted)
+
+The orientations minimize the number of distinct coordinates, thereby
+revealing both symmetry groups and embedding (eg, tetrahedron in cube in
+dodecahedron). Consequently, the latter is depicted resting on an edge (Z
+taken as up/down).
+
+    SOLID            VERTEX COORDINATES
+    -----------      ----------------------------------
+    Tetrahedron      (  1,  1,  1), (  1, -1, -1), ( -1,  1, -1), ( -1, -1,  1)
+    Cube             (+-1,+-1,+-1)
+    Octahedron       (+-1,  0,  0), (  0,+-1,  0), (  0,  0,+-1)
+    Cubeoctahedron   (  0,+-1,+-1), (+-1,  0,+-1), (+-1,+-1,  0)
+    Icosahedron      (  0,+-p,+-1), (+-1,  0,+-p), (+-p,+-1,  0)
+    Dodecahedron     (  0,+-i,+-p), (+-p,  0,+-i), (+-i,+-p,  0), (+-1,+-1,+-1)
+    Icosidodecahedron(+-2,  0,  0), (  0,+-2,  0), (  0,  0,+-2), ...
+                     (+-p,+-i,+-1), (+-1,+-p,+-i), (+-i,+-1,+-p)
+
+    with golden mean: p = (sqrt(5)+1)/2; i = (sqrt(5)-1)/2 = 1/p = p-1
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+For camera lenses, you can safely assume the distortion is very small
+except for wide angle lenses (which is probably the case you were
+interested in). I expect that lens manufacturers would be reluctant to
+release the actual numbers describing their lens's performance, since most
+people couldn't tell the difference anyway.
+
+For a lens focused at infinity and flat film,
+fov = 2 * atan ( film_width / ( 2 * focal_length ) )
+
+The only difference between a distortionless lens and an ideal pinhole
+camera with respect to field of view is that if the lens is focused at a
+finite distance, replace focal_length in the above formula with:
+1/(1/focal_length - 1/object_distance) which is the lens to image (film)
+distance.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Turbulence and Noise, by Ken Perlin
+
+[Since course notes are so hard to get, I thought I would reprint this.
+Bernie Kirby sent this to Thomas Setzer, who posted it, and now it's here.]
+
+                  EXCERPTED FROM SIGGRAPH 92, COURSE 23
+                           PROCEDURAL MODELING
+
+                               Ken Perlin
+                           New York University
+
+3.6 TURBULENCE AND NOISE
+
+3.6.1 The turbulence function
+
+The turbulence function, which you use to make marble, clouds, explosions,
+etc., is just a simple fractal generating loop built on top of the noise
+function. It is not a real turbulence model at all. The key trick is the
+use of the fabs() function, which makes the function have gradient
+discontinuity "fault lines" at all scales. This fools the eye into
+thinking it is seeing the results of turbulent flow. The turbulence()
+function gives the best results when used as a phase shift, as in the
+familiar marble trick:
+
+sin(point + turbulence(point) * point.x);
+
+Note the second argument below, lofreq, which sets the lowest desired
+frequency component of the turbulence. The third, hifreq, argument is used
+by the function to ensure that the turbulence effect reaches down to the
+single pixel level, but no further. I usually set this argument equal to
+the image resolution.
+
+float turbulence(point, lofreq, hifreq)
+float point[3], freq, resolution;
+ {
+  float noise3(), freq, t, p[3];
+
+  p[0] = point[0] + 123.456;
+  p[1] = point[1];
+  p[2] = point[2];
+  t = 0;
+  for (freq = lofreq ; freq < hifreq ; freq *= 2.)
+  {
+   t += fabs(noise3(p)) / freq;
+   p[0] *= 2.;
+   p[1] *= 2.;
+   p[2] *= 2.;
+  }
+  return t - 0.3; /* readjust to make mean value = 0.0 */
+ }
+
+3.6.2 The noise function
+
+noise3 is a rough approximation to "pink" (band-limited) noise,
+implemented by a pseudorandom tricubic spline. Given a vector in 3-space,
+it returns a value between -1.0 and 1.0. There are two principal tricks to
+make it run fast:
+
+- Precompute an array of pseudo-random unit length gradients g[n].
+- Precompute a permutation array p[] of the first n integers.
+
+Given the above two arrays, any integer lattice point (i,j,k) can be
+quickly mapped to a pseudorandom gradient vector by:
+
+g[ (p[ (p[i] + j) % n ] + k) % n]
+
+By extending the g[] and p[] arrays, so that g[n+i]=g[i] and p[n+i]=p[i],
+the above lookup can be replaced by the (somewhat faster):
+
+g[ p[ p[i] + j ] + k ]
+
+Now for any point in 3-space, we just have to do the following two steps:
+
+(1) Get the gradient for each of its surrounding 8 integer lattice points
+    as above.
+(2) Do a tricubic hermite spline interpolation, giving each lattice point
+    the value 0.0.
+
+The second step above is just an evaluation of the hermite derivative
+basis function 3 * t * t - 2 * t * t * t in each by a dot product of the
+gradient at the lattice.
+
+Here is my implementation in C of the noise function. Feel free to use it,
+as long as you reference where you got it. :-)
+
+ // noise function over R3 - implemented by a pseudorandom tricubic
+ // spline
+
+ #include
+ #include
+
+ #define DOT(a,b) (a[0] * b[0] + a[1] * b[1] + a[2] * b[2])
+ #define B 256
+
+ static p[B + B + 2];
+ static float g[B + B + 2][3];
+ static start = 1;
+
+ #define setup(i,b0,b1,r0,r1) \
+    t  = vec[i] + 10000.;     \
+    b0 = ((int)t) & (B-1);    \
+    b1 = (b0+1) & (B-1);      \
+    r0 = t - (int)t;          \
+    r1 = r0 - 1.;
+
+float noise3(vec)
+ float vec[3];
+ {
+  int      bx0, bx1, by0, by1, bz0, bz1, b00, b10, b01, b11;
+  float    rx0, rx1, ry0, ry1, rz0, rz1, *q, sy, sz, a, b, c, d, t, u, v;
+  register i, j;
+
+  if (start)
+  {
+   start = 0;
+   init();
+  }
+  setup(0, bx0,bx1, rx0,rx1);
+  setup(1, by0,by1, ry0,ry1);
+  setup(2, bz0,bz1, rz0,rz1);
+  i = p[ bx0 ];
+  j = p[ bx1 ];
+  b00 = p[ i + by0 ];
+  b10 = p[ j + by0 ];
+  b01 = p[ i + by1 ];
+  b11 = p[ j + by1 ];
+
+  #define at(rx,ry,rz) ( rx * q[0] + ry * q[1] + rz * q[2] )
+  #define surve(t) ( t * t * (3. - 2. * t) )
+  #define lerp(t, a, b) ( a + t * (b - a) )
+
+  sx = surve(rx0);
+  sy = surve(ry0);
+  sz = surve(rz0);
+  q = g[ b00 + bz0 ] ; u = at(rx0,ry0,rz0);
+  q = g[ b10 + bz0 ] ; v = at(rx1,ry0,rz0);
+  a = lerp(sx, u, v);
+  q = g[ b01 + bz0 ] ; u = at(rx0,ry1,rz0);
+  q = g[ b11 + bz0 ] ; v = at(rx1,ry1,rz0);
+  b = lerp(sx, u, v);
+  c = lerp(sy, a, b);          /* interpolate in y at lo x */
+  q = g[ b00 + bz1 ] ; u = at(rx0,ry0,rz1);
+  q = g[ b10 + bz1 ] ; v = at(rx1,ry0,rz1);
+  a = lerp(sx, u, v);
+  q = g[ b01 + bz1 ] ; u = at(rx0,ry1,rz1);
+  q = g[ b11 + bz1 ] ; v = at(rx1,ry1,rz1);
+  b = lerp(sx, u, v);
+  d = lerp(sy, a, b);          /* interpolate in y at hi x */
+  return 1.5 * lerp(sz, c, d); /* interpolate in z */
+ }
+
+static init()
+ {
+  long  random();
+  int   i, j, k;
+  float v[3], s;
+
+  // Create an array of random gradient vectors uniformly on the unit
+  // sphere
+
+  srandom(1);
+  for (i = 0 ; i < B ; i++)
+  {
+   do       // Choose uniformly in a cube
+   {
+    for (j=0 ; j<3 ; j++) v[j] = (float)((random() % (B + B)) - B) / B;
+    s = DOT(v,v);
+   } while (s > 1.0);              // If not in sphere try again
+   s = sqrt(s);
+   for (j = 0 ; j < 3 ; j++) g[i][j] = v[j] / s;  // Else normalize
+  }
+  // Create a pseudorandom permutation of [1..B]
+  for (i = 0 ; i < B ; i++) p[i] = i;
+  for (i = B ; i > 0 ; i -= 2)
+  {
+   k = p[i];
+   p[i] = p[j = random() % B];
+   p[j] = k;
+  }
+  /*/Extend g and p arrays to allow for faster indexing
+  for (i = 0 ; i < B + 2 ; i++)
+  {
+   p[B + i] = p[i];
+   for (j = 0 ; j < 3 ; j++) g[B + i][j] = g[i][j];
+  }
+ }
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+v = arccos(z/r) / pi
+u = ( arccos(x/(r sin(v pi))) ) / (2 pi)
+
+So, given a point (x,y,z) on the surface of the sphere the above gives the
+point (u,v) each component of which can be appropriately scaled to index
+into a texture image.
+
+Note
+
+* A sphere cannot be "unwrapped" without distortion, for example, the
+  length between points on the sphere will not equal the distance between
+  points on the unwrapped plane.
+
+* When implementing this in code it is important to note that arccos()
+  returns values from 0 to pi and not 1 to 2 pi as the the formula above
+  relies upon. The second half cycle of the arccos function is obtained by
+  noticing the sign of the y value. So the transformation written in C
+  might be as follows
+
+#define PI 3.141592654
+#define TWOPI 6.283185308
+
+void SphereMap(x,y,z,radius,u,v)
+ double x,y,z,r,*u,*v;
+ {
+  *v = acos(z/radius) / PI;
+  if (y >= 0) *u = acos(x/(radius * sin(PI*(*v)))) / TWOPI;
+  else        *u = (PI + acos(x/(radius * sin(PI*(*v))))) / TWOPI;
+ }
+
+There are still two special points, the exact north and south poles of the
+sphere, each of these two points needs to be "spread" out along the whole
+edge v=0 and v=1. IN the formula above this is where sin(v pi) = 0.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+The standard equation of a plane in 3 space is
+  Ax + By + Cz + D = 0
+The normal to the plane is the vector (A,B,C).
+
+Given three points in space (x1,y1,z1), (x2,y2,z2), (x3,y3,z3) the
+equation of the plane through these points is given by the following
+determinants
+  <Bilde>
+Expanding the above gives
+  A   = y1 (z2 - z3) + y2 (z3 - z1) + y3 (z1 - z2)
+  B   = z1 (x2 - x3) + z2 (x3 - x1) + z3 (x1 - x2)
+  C   = x1 (y2 - y3) + x2 (y3 - y1) + x3 (y1 - y2)
+  - D = x1 (y2 z3 - y3 z2) + x2 (y3 z1 - y1 z3) + x3 (y1 z2 - y2 z1)
+
+The sign of s = Ax + By + Cz + D determines which side the point (x,y,z)
+lies with respect to the plane. If s > 0 then the point lies on the same
+side as the normal (A,B,C). If s < 0 then it lies on the opposite side, if
+s = 0 then the point (x,y,z) lies on the plane.
+
+Alternatively
+
+If vector N is the normal to the plane then all points p on the plane
+satisfy the following
+
+  N * p = k
+where * is the dot product between the two vectors.
+ie: a * b = (ax,ay,az) * (bx,by,bz) = ax * bx + ay * by + az * bz
+Given any point a on the plane
+  N *(p - a) = 0
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+LIGHTBEAMS
+
+Id‚:
+
+
+ÚÄ¿
+³ ÚÄÄ¿
+ÀÄ³  ³
+  ³  ³
+  ÀÄÄÙ
+
+Se for oss at den over representerer en kube... i 3d... Den bakerste
+firkanten er et bitmap, bak dette har vi et lys, og lyset projekteres fram
+til den forreste firkanten.
+
+S†, n†r vi sender en ray gjennom denne firkanten, kan vi f›rst projektere
+ray'en ned til bitmap'et, og avstanden fra denne er distance.. Da har vi 3
+koordinater, U,V,Dist... Egentlig er dette da en voxel, hvor z-verdien
+kalkuleres... Og er distance...
+Vi kan dele ray-lengde gjennom denne voxelen i et visst antall biter
+(f.eks 32)... Og for hver "pixel" vi tracer gjennom, add‚r farge fra
+bitmap, modifisert v.hj.a distance.... Hvor mye av fargen vi adderer
+gjenspeiler hva slags materiale vi g†r gjennom... Tykk t†ke har h›y verdi,
+mens luft har bortimot 0...
+
+1. Vi intersekter ray med plan som definerer sidene p† "voxel"
+2. Intersect ray med disse planene... Projekt‚r entry og exit ned til
+   bitmap.. ta vare p† distance ogs† her.. Kall variablene U,V,Z.
+3. Deretter "texture-mapper" vi fra entry-U/V til exit-U/V og adderer
+   fargene vi g†r gjennom. Vi kan vel kanskje addere alle f›rst, og
+   deretter skalere ned fargen ?
+   Ikke clamp farge eter hver "pixel"...
+   Omtrent samme rutine som gouraud texture i innerloop, som adderer
+   farge...
+

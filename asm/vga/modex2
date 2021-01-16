@@ -1,0 +1,728 @@
+MASM
+COMMENT $
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+ This library written by Draeden of VLA.
+ 
+ Major thanks go to Themie Gouthas, as he is responsible for the majority
+ of the screen dimentions (all except 256 wide)
+
+
+ Four routines seperate this ModeX library from the others:
+
+  ResetLinear = Puts you into Mode 13h addressing again
+
+  ResetPlanar = And puts you back into planar mode
+
+  Do16  = Changes to a normal 16 color mode
+
+  Do256 = Changes back to a 256 color mode
+
+
+Use:
+    @SetModeX x360, y480, 1, 360    ;sets a 360x480x256 mode
+
+  The x360 is what width to use, the y480 is how many scan lines to use,
+  the 0 is how many scan lines each pixel uses, and the 360 is the 
+  virtual width of the screen.
+
+  So, to set a "80x50x256" mode, you'd do this:
+
+    @SetModeX x320, y400, 4, 320
+
+  This sets a 320 pixel wide screen with each pixel having a height of 4.
+
+  Enjoy.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+$
+Ideal
+p386
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+SCANy350 = 10000000b    ;(362 active)
+SCANy400 = 01000000b    ;(414 active)
+SCANy480 = 11000000b    ;(496 active)
+
+SCANx360 = 00000100b    ;(720 wide) 25-mHZ
+SCANx320 = 00000000b    ;(640 wide) 28-mHZ
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+LABEL _x256 WORD
+    db      SCANx320    ; Clock Select (CS)
+    db      06          ; Number of CRTC Registers to update
+    dw      05f00h      ; horz total
+    dw      03f01h      ; horz displayed
+    dw      04002h      ; start horz blanking
+    dw      0a003h      ; end horz blanking
+    dw      04f04h      ; start h sync
+    dw      00405h      ; end h sync
+    
+LABEL _x320 WORD
+    db      SCANx320    ; Clock Select (CS)
+    db      0           ; Number of CRTC Registers to update
+
+LABEL _x360 WORD
+    db      SCANx360    ; Clock Select (CS)
+    db      06          ; Number of CRTC Registers to update
+    dw      06b00h      ; horz total
+    dw      05901h      ; horz displayed
+    dw      05a02h      ; start horz blanking
+    dw      08e03h      ; end horz blanking
+    dw      05e04h      ; start h sync
+    dw      08a05h      ; end h sync
+
+LABEL _x376 WORD
+    db      SCANx360    ; Clock Select (CS)
+    db      06          ; Number of CRTC Registers to update
+    dw      06e00h      ; horz total
+    dw      05d01h      ; horz displayed
+    dw      05e02h      ; start horz blanking
+    dw      09103h      ; end horz blanking
+    dw      06204h      ; start h sync
+    dw      08f05h      ; end h sync
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+LABEL _y308 WORD
+    db      SCANy400    ; Horizontal Sync Polarity (HSP)
+    db      7           ; Number of CRTC Registers to update
+    dw      06206h      ; vertical total
+    dw      00f07h      ; overflow (VRS, VDE, VBS, VT)
+    dw      03710h      ; v sync start
+    dw      08911h      ; v sync end and protect cr0-cr7
+    dw      03312h      ; vertical displayed
+    dw      03c15h      ; v blank start
+    dw      05c16h      ; v blank end
+
+LABEL _Y360 word
+    db      SCANy480    ; Horizontal Sync Polarity (HSP)
+    db      5           ; Number of CRTC Registers to update
+    dw      08810h      ; v sync start
+    dw      08511h      ; v sync end and protect cr0-cr7
+    dw      06712h      ; vertical displayed
+    dw      06d15h      ; v blank start
+    dw      0ba16h      ; v blank end
+    
+LABEL _y400 WORD
+    db      SCANy400    ; Horizontal Sync Polarity (HSP)
+    db      0           ; Number of CRTC Registers to update     
+
+LABEL _y480 WORD
+    db      SCANy480    ; Horizontal Sync Polarity (HSP)
+    db      7           ; Number of CRTC Registers to update
+    dw      00d06h      ; vertical total
+    dw      03e07h      ; overflow (VRS, VDE, VBS, VT)
+    dw      0ea10h      ; v sync start
+    dw      0ac11h      ; v sync end and protect cr0-cr7
+    dw      0df12h      ; vertical displayed
+    dw      0e715h      ; v blank start
+    dw      00616h      ; v blank end
+    
+LABEL _y564 WORD
+    db      SCANy480    ; Horizontal Sync Polarity (HSP)
+    db      8           ; Number of CRTC Registers to update
+    dw      06206h      ; vertical total
+    dw      0f007h      ; overflow (VRS, VDE, VBS, VT)
+    dw      06009h      ; set VBS bit 9
+    dw      03710h      ; v sync start
+    dw      08911h      ; v sync end and protect cr0-cr7
+    dw      03312h      ; vertical displayed
+    dw      03c15h      ; v blank start
+    dw      05c16h      ; v blank end
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+x256    =   0
+x320    =   1
+x360    =   2
+x376    =   3
+
+y308    =   0
+y360    =   1
+y400    =   2
+y480    =   3
+y564    =   4
+
+o EQU OFFSET
+s EQU SHORT
+
+Xmodes  dw  o _x256, o _x320, o _x360, o _x376
+Ymodes  dw  o _y308, o _y360, o _y400, o _y480, o _y564
+
+NumXmodes   =   4
+NumYmodes   =   5
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+InputStatus1=   3dah
+MISC_OUTPUT =   3c2h
+READ_MISC   =   3cch
+SC_Index    =   3c4h
+CRTC_Index  =   3d4h
+Graph_Index =   3ceh
+Attr_Index  =   3c0h    ;don't forget to clear flipflop & set bit 5 on index
+PEL_Write   =   3c8h
+PEL_Read    =   3c7h
+PEL_Data    =   3c9h
+
+VGASeg      dw  0a000h
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; A MACRO!
+    ;
+    ; ARG: Xmode:Byte, Ymode:Byte, Cell_Height:Byte, Virtual_Width:WORD
+    ;
+    ; CELL_HEIGHT: how tall each pixel is in scan lines
+    ;
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+MACRO @SetModeX DaXmode, DaYmode, CHeight, DaWidth
+    mov     al,DaXmode
+    mov     ah,DaYmode
+    call    _Set_X_Mode
+    mov     ax,DaWidth
+    call    Set_Width
+    mov     ah,CHeight
+    call    Set_CellHeight
+ENDM @SetModeX
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Set a planar mode with requested dimensions
+    ;
+    ; IN: AL = index into X res chart
+    ;     AH = index into Y res chart
+    ;
+    ;OUT: CF = 1, invalid mode
+    ;     CF = 0, success
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC _Set_X_Mode NEAR
+
+    cmp     ah,NumYmodes
+    jae     s @@InvalidMode
+    cmp     al,NumYmodes
+    jae     s @@InvalidMode
+
+    jmp     s @@ValidMode
+
+@@InvalidMode:
+    stc                         ; idiot.
+    ret
+
+@@ValidMode:
+    pusha
+    push    es ds
+
+    cld
+    mov     bx,cs
+    mov     ds,bx
+    mov     es,bx
+
+    movzx   si,al
+    add     si,si
+    mov     si,[si + Xmodes]    ; point to correct X data set
+    movzx   bx,ah
+    add     bx,bx
+    mov     bx,[bx + Ymodes]    ; point to correct Y data set
+
+    mov     ax,13h              ; let the BIOS set standard 256-color
+    int     10h                 ;  mode (320x200 linear)
+
+    mov     dx,SC_INDEX
+    mov     ax,0604h
+    out     dx,ax               ; disable chain4 mode
+
+    mov     ch,[si]             ; get X clock
+    or      ch,[bx]             ; get Y clock
+    or      ch,00100011b        ; set PB, ER, IOA
+    inc     si
+    inc     bx
+    
+    mov     dx,READ_MISC
+    in      al,dx
+    cmp     al,ch
+    je      s @@NoClockSet
+
+    mov     dx,SC_INDEX
+    mov     ax,0100h
+    out     dx,ax               ; synchronous reset while setting Misc Output
+    
+    mov     dx,MISC_OUTPUT
+    mov     al,ch
+    out     dx,al               ; select the dot clock and Horiz
+                                ;  scanning rate
+    mov     dx,SC_INDEX
+    mov     ax,0300h
+    out     dx,ax               ; undo reset (restart sequencer)
+
+@@NoClockSet:
+
+    mov     dx,CRTC_INDEX       ; reprogram the CRT Controller
+    mov     al,11h              ; VSync End reg contains register write
+    out     dx,al               ; protect bit
+    inc     dx                  ; CRT Controller Data register
+    in      al,dx               ; get current VSync End register setting
+    and     al,07fh             ; remove write protect on various
+    out     dx,al               ; CRTC registers
+    dec     dx                  ; CRT Controller Index
+
+    mov     ax,00014h           ; turn off dword mode
+    out     dx,ax
+    mov     ax,0e317h           ; turn on byte mode
+    out     dx,ax
+
+    lodsb                       ; lets do the X stuff
+    movzx   cx,al
+    jcxz    @@NoX
+
+@@SetCRTParmsLoop:
+    lodsw                       ; do the next CRT Index/Data pair
+    out     dx,ax
+    loop    @@SetCRTParmsLoop
+
+@@NoX:
+    mov     si,bx
+    lodsb
+    movzx   cx,al
+    jcxz    @@NoY
+
+@@SetCRTParmsLoop2:
+    lodsw                       ; do the next CRT Index/Data pair
+    out     dx,ax
+    loop    @@SetCRTParmsLoop2
+
+@@NoY:
+
+    mov     dx,SC_INDEX
+    mov     ax,0f02h
+    out     dx,ax               ; enable writes to all four planes
+
+                                ; now clear all display memory, 8 pixels
+    mov     es,[VGAseg]         ; at a time
+    xor     di,di               ; point ES:DI to display memory
+    xor     ax,ax               ; clear to zero-value pixels
+    mov     cx,8000h            ; # of words in display memory
+    rep     stosw               ; clear all of display memory
+    
+    pop     ds es
+    popa
+    clc                         ; success!
+    ret
+ENDP
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+;*   MISC planar mode routines
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Sets logical width of screen to whats in CX
+    컴컴
+    ; IN: AX = desired width
+    ;
+    ;OUT: AX = real width
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Set_Width NEAR
+    push    dx
+    shr     ax,3            ; divide by 8
+    mov     ah,al           ; move value into AH
+    mov     dx,CRTC_INDEX   ; get the PORT
+    mov     al,13h          ; and the INDEX
+    out     dx,ax           ; set it
+    movzx   ax,ah           ; put value back in AX
+    shl     ax,3            ; mult by 8
+    pop     dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Sets the MSL register.  It's the number of scan lines the
+    ; data is repeated before advancing to the next data line. 
+    ; (Char Height in TEXT mode.)
+    컴컴
+    ; IN: AH = Cell height
+    ;
+    ;OUT: AX is destoryed
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Set_CellHeight NEAR
+    push    dx
+    dec     ah              ;Cell height - 1
+    mov     dx,CRTC_Index
+    mov     al,9
+    out     dx,al
+    inc     dl
+    in      al,dx
+    and     al,11100000b
+    or      al,ah
+    out     dx,al
+    pop     dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Latches the planes to be read from/written to
+    ;
+    ; NOTE: After calling this routine once, you can set the latch by
+    ;       doing an OUT to PORT SC_Index + 1 with the plane mask.
+    ;       This works until SC_Index is changed.
+    컴컴
+    ; IN: AH = plane mask - bit 0 = plane 0, 1 = 1, etc.. upto 4
+    ;
+    ;OUT: AL is destroyed
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Latch_Planes NEAR
+    push    dx
+    mov     dx,SC_Index
+    mov     al,2
+    out     dx,ax
+    pop     dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Latches a plane for READ operation (only for READ MODE #0)
+    컴컴
+    ; IN: AH = plane to latch for read (0-3)
+    ;
+    ;OUT: AL is destroyed
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC  Set_Read_Plane NEAR
+    push    dx
+    mov     dx,Graph_Index
+    mov     al,4
+    out     dx,ax
+    pop     dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Sets WRITE mode (0-3)
+    ;
+    ; WM0:  Data from BUS goes to Video Memory (all latched planes)
+    ;
+    ; WM1:  Data is read into 32bit latch and written from 32bit latch
+    ;       BUS data has no effect.  Allows data from all 4 planes to 
+    ;       be moved from one place in VGA to another.
+    ;
+    ; WM2 & WM3:  Look them up.
+    ;
+    컴컴
+    ; IN: AH = WRITE mode (0-3)
+    ;
+    ;OUT: AL is destroyed
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Set_Write_Mode NEAR
+    push    dx
+    mov     dx,Graph_Index
+    mov     al,5
+    out     dx,al
+    inc     dx
+    in      al,dx
+    and     al,11111100b    ;clear out write mode bits
+    or      al,ah
+    out     dx,al
+    pop     dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Sets the READ mode
+    ;
+    ; RM0 = Normal one. Reads data.
+    ;
+    ; RM1 = Weird one. Reads results of comparison.
+    컴컴
+    ; IN: AH = read mode (0 or 1)
+    ;
+    ;OUT: AX is destroyed
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Set_Read_Mode NEAR
+    push    dx
+    mov     dx,Graph_Index
+    mov     al,5
+    out     dx,al
+    inc     dx
+    in      al,dx
+    and     al,11110111b    ;clear out write mode bits
+    shl     ah,3            ;move bit to correct position
+    and     ah,00001000b
+    or      al,ah
+    out     dx,al
+    pop     dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Sets starting offset - useful for panning or using multiple pages.
+    ;
+    컴컴
+    ; IN: BX = Offset
+    ;
+    ;OUT: AX is destoryed
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Set_Start_Offset NEAR
+    push    dx
+    mov     dx,CRTC_Index
+    mov     al,0ch
+    mov     ah,bh       ;write the HIGH byte
+    out     dx,ax
+    inc     al
+    mov     ah,bl       ;write the LOW byte
+    out     dx,ax
+    pop     dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Sets the pelpan value - useful for smooth sideways panning
+    ;
+    ; NOTE: DO NOT USE ODD VALUES except in text mode or 16 color mode
+    ;
+    컴컴
+    ; IN: AH = pelpan value
+    ;
+    ;OUT: AL is destoryed
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Set_HPP NEAR
+    push    dx
+    mov     dx,InputStatus1
+    in      al,dx           ;dummy input
+    mov     dx,Attr_Index
+    mov     al,33h
+    out     dx,al
+    mov     al,ah
+    out     dx,al
+    pop     dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Sets pixel pan compatibility - makes it so the HPP value does not
+    ;  alter the split screen.
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Set_PPC NEAR
+    push    ax dx
+    mov     dx,InputStatus1
+    in      al,dx           ;dummy input
+    mov     dx,Attr_Index
+    mov     al,30h
+    out     dx,al
+    inc     dx
+    in      al,dx
+    dec     dx
+    or      al,00100000b
+    out     dx,al
+    pop     dx ax
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Sets the split screen scan line
+    컴컴
+    ; IN: BX = Scan line to set split at
+    ;
+    ;OUT: None
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Set_Split NEAR
+    push    dx ax
+    mov     al,18h
+    mov     ah,bl
+    mov     dx,CRTC_Index
+    out     dx,ax       ;set bits 0-7
+
+    mov     al,09h
+    out     dx,al
+    inc     dx
+    in      al,dx
+    mov     ah,bh
+    and     ah,00000010b
+    shl     ah,5
+    and     al,10111111b
+    or      al,ah
+    out     dx,al       ;set bit 9
+
+    dec     dx
+    mov     al,07h
+    out     dx,al
+    inc     dx
+    in      al,dx
+    and     al,11101111b
+    mov     ah,bh
+    and     ah,00000001b
+    shl     ah,4
+    or      al,ah
+    out     dx,al       ;set bit 8
+    pop     ax dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Waits until verticle retrace starts and then waits for it to end.
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Wait_FVR1 NEAR
+    push    dx ax
+    mov     dx,InputStatus1
+@@Vr:
+    in      al,dx
+    test    al,8
+    jz      s @@Vr                  ;wait until Verticle Retrace starts
+@@Nvr:
+    in      al,dx
+    test    al,8
+    jnz     s @@Nvr                 ;wait until Verticle Retrace Ends
+    pop     ax dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Waits until NON-VR time and then wait for VR to start
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Wait_FVR2 NEAR
+    push    dx ax
+    mov     dx,InputStatus1
+@@Vr:
+    in      al,dx
+    test    al,8
+    jnz     s @@Vr                  ;wait until Verticle Retrace starts
+@@Nvr:
+    in      al,dx
+    test    al,8
+    jz      s @@Nvr                 ;wait until Verticle Retrace Ends
+    pop     ax dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Waits until VR is true - MAY be missed if interrupts are enabled
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Wait_VR NEAR
+    push    dx ax
+    mov     dx,InputStatus1
+@@Vr:
+    in      al,dx
+    test    al,8
+    jz      s @@Vr                  ;wait until Verticle Retrace starts
+    pop     ax dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Waits for a NON-VR period
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Wait_NVR NEAR
+    push    dx ax
+    mov     dx,InputStatus1
+@@Nvr:
+    in      al,dx
+    test    al,8
+    jnz     s @@Nvr                 ;wait until Verticle Retrace Ends
+    pop     ax dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Write a specified palette chunk
+    컴컴
+    ; IN: DS:SI = Address of palette
+    ;        CX = Number of colors to write (NOT *3)
+    ;        AL = Starting palette index
+    ;
+    ;OUT: None
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC WritePalette NEAR
+    push    dx cx si
+    mov     dx,cx
+    add     cx,cx
+    add     cx,dx
+    mov     dx,03c8h
+    out     dx,al
+    inc     dx
+    cld
+    rep outsb
+    pop     si cx dx
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Puts the VGA card back into PLANAR mode at current resolutions
+    ;
+    ; NOTE: It is recommended that you clear ALL 256k VGA memory AFTER
+    ;       resetting into PLANAR mode, as SOME VGA cards may go funky.
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC ResetPlanar NEAR
+    push    ax dx
+    mov     dx,SC_INDEX
+    mov     ax,0604h
+    out     dx,ax               ; disable chain4 mode
+    
+    mov     dx,CRTC_INDEX
+    mov     ax,00014h           ; turn off dword mode
+    out     dx,ax
+    mov     ax,0e317h           ; turn on byte mode
+    out     dx,ax
+    pop     dx ax
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ; Changes from ModeX back to linear mode (like MODE 13h)
+    ;
+    ; NOTE: It is recommended that you clear ALL 256k VGA memory BEFORE
+    ;       resetting into LINEAR mode, as SOME VGA cards may go funky.
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC ResetLinear NEAR
+    push    dx ax
+    mov     dx,SC_INDEX
+    mov     ax,0E04h
+    out     dx,ax               ; enable chain4 mode
+
+    mov     dx,CRTC_INDEX       ; reprogram the CRT Controller
+    mov     ax,04014h           ; turn on dword mode
+    out     dx,ax
+    mov     ax,0a317h           ; turn off byte mode
+    out     dx,ax
+    pop     ax dx
+    ret
+ENDP
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+;Differences between 16 color mode and X-Mode:
+;
+;        16 color     256 color
+;
+; GRAPH  5 = 00h        40h     ;Shift register is different
+;
+; ATTR   6 = 14h        06      ;these are palette remap differences
+;        8 = 38h        08      ; so they don't matter one whit
+;        9 = 39h        09
+;        A = 3ah        0a
+;        B = 3bh        0b
+;        C = 3ch        0c
+;        D = 3dh        0d
+;        E = 3eh        0e
+;        F = 3fh        0f
+;       10 = 01h        41      ;PCS is different
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ;   Changes FROM 256 color planar TO 16 color planar
+    ;
+    ; The screen WILL screw up when the change is made, so clear it
+    ;first.  Also sets the read/write mode to 0.
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Do16 NEAR
+    push    ax dx
+
+    mov     dx,Graph_Index
+    mov     ax,00005h           ;set Shift reg to 0
+    out     dx,ax
+
+    mov     dx,InputStatus1
+    in      al,dx               ;dummy input
+    mov     dx,Attr_Index
+    mov     al,30h
+    out     dx,al
+    mov     al,21h              ;turn off PCS, and turns on PCC
+    out     dx,al
+
+    mov     ah,0
+    call    Set_Hpp
+
+    pop     dx ax
+    ret
+ENDP
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+    ;   Changes FROM 16 color planar TO 256 color planar
+    ;
+    ; The screen WILL screw up when the change is made, so clear it
+    ;first.  Also sets the read/write mode to 0.
+    컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+PROC Do256 NEAR
+    push    ax dx
+
+    mov     dx,Graph_Index
+    mov     ax,04005h           ;set Shift reg to 1
+    out     dx,ax
+
+    mov     dx,InputStatus1
+    in      al,dx               ;dummy input
+    mov     dx,Attr_Index
+    mov     al,30h
+    out     dx,al
+    mov     al,61h              ;turns on PCS & PCC
+    out     dx,al
+
+    mov     ah,0
+    call    Set_Hpp
+
+    pop     dx ax
+    ret
+ENDP

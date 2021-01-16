@@ -1,0 +1,379 @@
+The 3ds file format is made up of chunks. They describe what information
+is to follow and what it is made up of, it's ID and the location of the
+next block. IF you don't understand a chunk you can quite simply skip it.
+The next chunk pointer is relative to the start of the current chunk and
+in bytes.
+
+A chunk is defined as:
+
+start end size name
+
+unsigned short int Chunk ID
+unsigned int       Pointer to next chunk relative to the place where
+                   Chunk ID is, in other words the length of the chunk
+
+Chunks have a hierarchy imposed on them that is identified byt it's ID.
+A 3ds file has the Primary chunk ID 4D4Dh. This is always the first
+chunk of the file. Within the primary chunk are the main chunks.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+CHUNK_RGBF      = 0x0010
+CHUNK_RGBB      = 0x0011
+CHUNK_PRJ       = 0xC23D
+CHUNK_MLI       = 0x3DAA
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+    CHUNK_MAIN      = 0x4D4D
+    ³
+    ÃÄÄ CHUNK_OBJMESH   = 0x3D3D
+    ³   ³
+    ³   ÃÄÄ CHUNK_BKGCOLOR  = 0x1200
+    ³   ³
+    ³   ÃÄÄ CHUNK_AMBCOLOR  = 0x2100
+    ³   ³
+    ³   ÀÄÄ CHUNK_OBJBLOCK  = 0x4000
+    ³       ³
+    ³       ³ ASCIIZ string of the objects name.
+    ³       ³
+    ³       ÃÄÄ CHUNK_TRIMESH   = 0x4100
+    ³       ³   ³
+    ³       ³   ÃÄÄ CHUNK_VERTLIST  = 0x4110
+    ³       ³   ³
+    ³       ³   ³    unsigned int NumVerts; // Number of vertices in object
+    ³       ³   ³    {
+    ³       ³   ³     float x,y,z;
+    ³       ³   ³    }
+    ³       ³   ³
+    ³       ³   ÃÄÄ CHUNK_VERTFLAGS = 0x4111
+    ³       ³   ³
+    ³       ³   ÃÄÄ CHUNK_FACELIST  = 0x4120
+    ³       ³   ³
+    ³       ³   ³    unsigned int NumPolys; // Number of polygons in object
+    ³       ³   ³    {
+    ³       ³   ³     unsigned int a,b,c;
+    ³       ³   ³     unsigned int flags;
+    ³       ³   ³    }
+    ³       ³   ³
+    ³       ³   ³    flags:
+    ³       ³   ³    bit 01 CA
+    ³       ³   ³        02 BC
+    ³       ³   ³        04 AB
+    ³       ³   ³        08 U-wrap
+    ³       ³   ³        10 V-wrap
+    ³       ³   ³
+    ³       ³   ÃÄÄ CHUNK_FACEMAT   = 0x4130
+    ³       ³   ³
+    ³       ³   ³   char *MaterialName; // asciiz
+    ³       ³   ³   short int NumberOfFacesWithThisMaterial
+    ³       ³   ³   {
+    ³       ³   ³    short int FaceNumberWithThisMaterial
+    ³       ³   ³   }
+    ³       ³   ³
+    ³       ³   ÃÄÄ CHUNK_MAPLIST   = 0x4140
+    ³       ³   ³
+    ³       ³   ³   short int NumVerticesWithMapping
+    ³       ³   ³   {
+    ³       ³   ³    float u,v;
+    ³       ³   ³   }
+    ³       ³   ³
+    ³       ³   ÃÄÄ CHUNK_SMOOLIST  = 0x4150
+    ³       ³   ³
+    ³       ³   ³   nFaces * unsigned int; // 32-bit flag. 1 bit pr smoothing group
+    ³       ³   ³
+    ³       ³   ³
+    ³       ³   ÃÄÄ CHUNK_TRMATRIX  = 0x4160
+    ³       ³   ³
+    ³       ³   ³     float  3x3 matrix (rotation matrix)
+    ³       ³   ³     float  1x3 vector (translation vector)
+    ³       ³   ³
+    ³       ³   ÃÄÄ CHUNK_MESHCOLOR = 0x4165
+    ³       ³   ³
+    ³       ³   ÀÄÄ CHUNK_TXTINFO   = 0x4170
+    ³       ³
+    ³       ÃÄÄ CHUNK_LIGHT     = 0x4600
+    ³       ³   ³
+    ³       ³   ³ float LightPosX
+    ³       ³   ³ float LightPosY
+    ³       ³   ³ float LightPosZ
+    ³       ³   ³
+    ³       ³   ÀÄÄ CHUNK_SPOTLIGHT = 0x4610
+    ³       ³
+    ³       ³         float TargetPosX
+    ³       ³         float TargetPosY
+    ³       ³         float TargetPosZ
+    ³       ³         float HotSpot
+    ³       ³         float FallOff
+    ³       ³
+    ³       ÃÄÄ CHUNK_CAMERA    = 0x4700
+    ³       ³
+    ³       ³     float  CameraPosX
+    ³       ³     float  CameraPosY
+    ³       ³     float  CameraPosZ
+    ³       ³     float  CameraTargetX
+    ³       ³     float  CameraTargetY
+    ³       ³     float  CameraTargetZ
+    ³       ³     float  CameraBank (rotation angle)
+    ³       ³     float  CameraLens
+    ³       ³
+    ³       ÀÄÄ CHUNK_HIERARCHY = 0x4F00
+    ³
+    ÃÄÄ CHUNK_VIEWPORT  = 0x7001
+    ³
+    ÃÄÄ CHUNK_MATERIAL  = 0xAFFF
+    ³   ³
+    ³   ÃÄÄ CHUNK_MATNAME   = 0xA000
+    ³   ³
+    ³   ³     asciiz  MaterialName
+    ³   ³
+    ³   ÃÄÄ CHUNK_AMBIENT   = 0xA010
+    ³   ³
+    ³   ÃÄÄ CHUNK_DIFFUSE   = 0xA020
+    ³   ³
+    ³   ÃÄÄ CHUNK_SPECULAR  = 0xA030
+    ³   ³
+    ³   ÃÄÄ CHUNK_TEXTURE   = 0xA200
+    ³   ³
+    ³   ÃÄÄ CHUNK_BUMPMAP   = 0xA230
+    ³   ³
+    ³   ÀÄÄ CHUNK_MAPFILE   = 0xA300
+    ³
+    ³         asciiz  MapFileName
+    ³
+    ÀÄÄ CHUNK_KEYFRAMER = 0xB000
+        ³
+        ÃÄÄ CHUNK_AMBIENTKEY    = 0xB001
+        ³
+        ÃÄÄ CHUNK_TRACKINFO = 0xB002
+        ³   ³
+        ³   ÃÄÄ CHUNK_TRACKOBJNAME  = 0xB010
+        ³   ³
+        ³   ³     asciiz        Object name
+        ³   ³     short int  unknown ;; flags ???
+        ³   ³     short int  unknown ;;
+        ³   ³     short int  Hierarchy of Object
+        ³   ³
+        ³   ³     The object hierarchy is a bit complex but works like this.
+        ³   ³     Each Object in the scene is given a number to identify its
+        ³   ³     order in the tree. Also each object is orddered in the 3ds
+        ³   ³     file as it would appear in the tree.
+        ³   ³     The root object is given the number -1 ( FFFF ).
+        ³   ³     As the file is read a counter of the object number is kept.
+        ³   ³     Is the counter increments the object are children of the
+        ³   ³     previous objects.But when the pattern is broken by a number
+        ³   ³     what will be less than the current counter the hierarchy returns
+        ³   ³     to that level.
+        ³   ³
+        ³   ³     for example.
+        ³   ³
+        ³   ³     object   hierarchy
+        ³   ³     name
+        ³   ³
+        ³   ³     A      -1
+        ³   ³     B       0                 This example is taken
+        ³   ³     C       1                 from 50pman.3ds
+        ³   ³     D       2
+        ³   ³     E       1                 I would really reccomend
+        ³   ³     F       4                 having a look at one of the
+        ³   ³     G       5                 examples with the hierarchy
+        ³   ³     H       1                 numbers to help work it out.
+        ³   ³     I       7
+        ³   ³     J       8
+        ³   ³     K       0
+        ³   ³     L      10
+        ³   ³     M      11
+        ³   ³     N       0
+        ³   ³     O      13
+        ³   ³     P      14
+        ³   ³
+        ³   ³                            A
+        ³   ³          +-----------------+----------------+
+        ³   ³          B                 K                N
+        ³   ³     +----+----+            +                +
+        ³   ³     C    E    H            L                O
+        ³   ³     +    +    +            +                +
+        ³   ³     D    F    I            M                P
+        ³   ³          +    +
+        ³   ³          G    J
+        ³   ³
+        ³   ³     Still not done with this chunk yet !
+        ³   ³     If the object name is $$$DUMMY then it is a dummy object
+        ³   ³     and therefore you should expect a few extra chunks.
+        ³   ³
+        ³   ³     * B011 - Dummy objects name.
+        ³   ³     Names a dummy object. ASCIIZ string.
+        ³   ³
+        ³   ÃÄÄ CHUNK_TRACKPIVOT    = 0xB013
+        ³   ³
+        ³   ³     float  x,y,z; pivot point
+        ³   ³
+        ³   ÃÄÄ CHUNK_TRACKPOS      = 0xB020
+        ³   ³
+        ³   ³     word  5 unknowns
+        ³   ³     word  NumPositionKeys
+        ³   ³     work  unknown
+        ³   ³
+        ³   ³     NumPositionKeys
+        ³   ³     {
+        ³   ³      word FrameNumber
+        ³   ³      work unknown
+        ³   ³      word Flags
+        ³   ³      ... spline ... (see below)
+        ³   ³      float PosX,PosY,PosZ
+        ³   ³     }
+        ³   ³
+        ³   ÃÄÄ CHUNK_TRACKROTATE   = 0xB021
+        ³   ³
+        ³   ³     word  5 unknowns
+        ³   ³     word  NumRotationKeys
+        ³   ³     work  unknown
+        ³   ³
+        ³   ³     NumRotationKeys
+        ³   ³     {
+        ³   ³      word FrameNumber
+        ³   ³      work unknown
+        ³   ³      word Flags
+        ³   ³      ... spline ... (see below)
+        ³   ³      float angle   ( degrees = angle*180/PI)
+        ³   ³      float RotX,RotY,RotZ
+        ³   ³     }
+        ³   ³
+        ³   ÃÄÄ CHUNK_TRACKSCALE    = 0xB022
+        ³   ³
+        ³   ³     word  5 unknowns
+        ³   ³     word  NumScaleKeys
+        ³   ³     work  unknown
+        ³   ³
+        ³   ³     NumScaleKeys
+        ³   ³     {
+        ³   ³      word FrameNumber
+        ³   ³      work unknown
+        ³   ³      word Flags
+        ³   ³      ... spline ... (see below)
+        ³   ³      float ScaleX,ScaleY,ScaleZ
+        ³   ³     }
+        ³   ³
+        ³   ÃÄÄ CHUNK_TRACKMORPH    = 0xB026
+        ³   ³
+        ³   ³     word  5 unknowns
+        ³   ³     word  NumMorphKeys
+        ³   ³     work  unknown
+        ³   ³
+        ³   ³     NumMorphKeys
+        ³   ³     {
+        ³   ³      word FrameNumber
+        ³   ³      work unknown
+        ³   ³      word Flags
+        ³   ³      ... spline ... (see below)
+        ³   ³      asciiz ObjectName
+        ³   ³     }
+        ³   ³
+        ³   ÃÄÄ CHUNK_TRACKHIDE     = 0xB029
+        ³   ³
+        ³   ÀÄÄ CHUNK_OBJNUMBER     = 0xB030
+        ³
+        ³         short int parent object
+        ³
+        ÃÄÄ CHUNK_TRACKCAMERA = 0xB003
+        ³
+        ³       CHUNK_TRACKFOV  = 0xB023
+        ³
+        ³         word  5 unknowns
+        ³         word  NumFOVKeys
+        ³         work  unknown
+        ³
+        ³         NumFOVKeys
+        ³         {
+        ³          word FrameNumber
+        ³          work unknown
+        ³          word Flags
+        ³          ... spline ... (see below)
+        ³          float FOV
+        ³         }
+        ³
+        ³       CHUNK_TRACKROLL = 0xB024
+        ³
+        ³         word  5 unknowns
+        ³         word  NumRollKeys
+        ³         work  unknown
+        ³
+        ³         NumRollKeys
+        ³         {
+        ³          word FrameNumber
+        ³          work unknown
+        ³          word Flags
+        ³          ... spline ... (see below)
+        ³          float Roll
+        ³         }
+        ³
+        ÃÄÄ CHUNK_TRACKCAMTGT = 0xB004
+        ³
+        ÃÄÄ CHUNK_TRACKLIGHT  = 0xB005
+        ³
+        ÃÄÄ CHUNK_TRACKLIGTGT = 0xB006
+        ³
+        ÃÄÄ CHUNK_TRACKSPOTL  = 0xB007
+        ³
+        ÀÄÄ CHUNK_FRAMES    = 0xB008
+
+              // simple structure describing frame info
+
+              unsigned long   start frame
+              unsigned long   end frame
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+... splines ...
+
+void SplineFlagsReader(FILE *f, int ind, word flags)
+{
+ int i;
+ float dat;
+
+ for (i = 0; i < 16; i++)
+ {
+  static const char *flagnames[] =
+  {
+   "Tension",
+   "Continuity",
+   "Bias",
+   "Ease To",
+   "Ease From",
+  };
+  if (flags & (1 << i))
+  {
+   if (fread(&dat, sizeof(dat), 1, f) != 1) return;
+   if (i < sizeof(flagnames)/sizeof(*flagnames))
+   {
+    printf("%*s             %-15s = %f\n",ind, "", flagnames[i], dat);
+   }
+   else
+   {
+    printf("%*s             %-15s = %f\n",ind, "", "Unknown", dat);
+   }
+  }
+ }
+}
+
+Which (probably means):
+
+- unsigned int SplineFlags
+  - if bit 0: float TensionInfo
+  - if bit 1: float ContinuityInfo
+  - if bit 2: float BiasInfo
+  - if bit 3: float EaseToInfo
+  - if bit 4: float EaseFromInfo
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+
+
+
+
+
+
+
+
+
+

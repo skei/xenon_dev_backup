@@ -1,0 +1,81 @@
+Chaotic documentation:
+
+This is more like a dump of the structures in my own 3d engine, so there
+might be a lot of info you don't need here... Also, not everything is
+calculated yet, like he bounding sphere radius, etc... This will come
+later...
+
+Most fields should be pretty easy to understand. The more diffuse ones
+are (including the flags I use in my own engine:
+
+Mat_Flags      : 1 Texture
+                 2 Opacity
+                 4 Reflection
+                 8 Bump
+Obj_Flags      : 1 active
+                 2 mapped (has u/v coordinates)
+Obj_Sphere     : Diameter of bounding sphere
+Obj_NumNormals : I decided to have a separate list of normals (& u/v
+                 coordinates), and each vertex & polygon have a pointer to
+                 the normal it should use..
+                 I will pre-process the object: compare the normals, and
+                 remove duplicate, identical normals. Then have the
+                 pointers point to the same normal.
+                 This way I need less normals - and processing normals for
+                 shading, etc runtime will be less time-consuming.
+                 Additionally, this is needed for fixing the U/V wrapping
+                 bug found in most other engines.
+Obj_NormalUV   : When I load the 3DS file, I create the same number of
+                 Normals as the number of vertices, and let each vertex
+                 point to the same normal-number. And I just load the U/V
+                 coordinates into the normal structures...
+                 Post-processing after loading the 3ds, may result in a
+                 change here, due to equal normals, fixing u/v wrapping
+                 etc, etc....
+Obj_Polygon    : Flags a b c material-name
+                 Flags:  8 u-wrapping
+                        16 v-wrapping
+                 a,b,c = The polygon's vertices, ordered clockwise
+*_kf*Spline    : tens cont bias easeto easefrom
+*_kfRotData    : quaternion : x,y,z,w. These have been preprocessed. 3DS
+                 saves the absolute axis/angles, not relative to last
+                 keyframe. I process them, so I just need to interpolate
+                 throught these quat values to get correct rotation.
+Cam_Flags      : 1 active
+Lig_Flags      : 1 active
+Lig_Type       : 1 omni
+                 2 spot
+Lig_Strengt    : used in my own engine. Intensity of light Lig_MaxRange
+               : --"--                  range of influence
+
+-----------------------------------------------------------------------------
+
+Also note that I have already fixed the object hierarchy (as much as I
+need to get it working in my own engine, at least :)
+
+-----------------------------------------------------------------------------
+
+I suggest you make your own parser, to convert the output file to a binary
+file, and just skip the stuff you don't need.... This will result in a
+MUCH smaller file!
+Or you could ask me about the source to this. But you have to ask VERY
+nicely if I should even consider it... :)
+
+If there's anything you don't understand, or anything you miss or
+something, just send me an email...!
+
+-----------------------------------------------------------------------------
+
+I know there's a lot of stuf missing in the output file... This proggy is
+more like a result of my own experimenting while making my own 3DS
+loader. And I implemented only the stuff I needed as my engine evolved. I
+have already included a lot more, and actually parses almost every single
+chunk in the 3DS file...
+I will release a new version as soon as I feel I have included everything
+in the 3DS file format...
+
+-----------------------------------------------------------------------------
+
+Axon / Inf & Xenon / t-hskei@online.no
+
+-----------------------------------------------------------------------------

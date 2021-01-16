@@ -1,0 +1,20 @@
+CFLAGS  = /zq /c /5r /fp5 /j /oneatxm /fpi87
+LFLAGS  = /fe=$(APP)
+
+APP = test.exe
+OBJS = engine.obj   &
+       math3d.obj   &
+       load3ds.obj  &
+       spline.obj   &
+       test.obj
+LIBS =
+
+CC = wcl386
+LL = wcl386
+
+.c.obj : .AUTODEPEND
+        $(CC) $(CFLAGS) $[@
+
+$(APP) : $(OBJS)
+         $(LL) $(LFLAGS) $(OBJS) $(LIBS)
+

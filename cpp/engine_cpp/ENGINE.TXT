@@ -1,0 +1,93 @@
+:: Se i d:\engine\1\engine.txt ::
+
+ ----------
+
+ A (SetupCamera)  Setup camera matrix (World->Camera, or inverse?)
+ B (SetupFrustum) Setup view frustum planes
+ C (HandleLight)  Calc Light->World matrix for all lights in scene
+ D (HandleObject) For all objects
+   a Calc Objects->World matrix
+   b Transform all lights to Object Space
+   c Cleck bounding sphere against frustum (distance from point to plane.
+     Set up some bits to indicate which plane we might need to clip against
+     later on (we only need to clip against the frustum planes (or screen
+     edges in 2D) that the bounding sphere intersects)
+   d If bounding sphere is TOTALLY outside of frustum, skip object
+   e Clear all CLIP and VISIBLE flags in object/vertices/faces/whatever
+   f Inverse transform camera to ObjectSpace (inverse Object->Camera
+     matrix)
+   g (HandlePoly) For all polys in object
+     1 Check dot-prot plane/camera vector
+     2 If not visible (poly points away from camera) ...
+     3 Transform the poly's vertices to Camera space (if not already
+       transformed, mark them as we go with a flag or something, and clear
+       them all before rendering).
+       Object->Camera => Object->World->Camera
+     4 Check >-clipping: If all Z's outside of near/far >-plane, skip
+       poly, else mark it as: ZClipNeeded
+
+     5 Project vertices to 2D
+     6 Check if 2D poly is outside 2D screen boundaries, if so, skip poly.
+       If some outside, mark which sides to clip (bitfield)
+     7 Calc Vertex/Light intensity (and Face light if FlatShading)
+     8 Fog/Haze vertex calculations
+     9 Insert poly in renderList
+   h Calc things like constant gradients for texture mapping, etc (does it
+     work if the poly is not a triangle? i.e. can we postpone it even
+     further in case we don't need it?)
+   i Check Z-plane clipping flags. Clip if necessary. May result in poly
+     with more than 3 sides (not a triangle anymore)
+   j 2d clipping. Check which planes the bounding sphere intersects, and only
+     clip against these sides.
+   k Triangularize poly (vertex 1-2-3, 1-3-4, 1-4-5, etc), and draw each
+     poly as you create them
+
+-----
+
+ToDo:
+
+1. Se om vi kan optimere selve renderPipeLine f›r vi setter igang
+   definering av typer, etc...
+2. Ikke glem det vi M ha med n†r vi setter opp typer, etc. (Shading
+   Groups, etc - Ptr til Normal, s† flere vertices kan dele Normal, eller
+   flere polyer deler samme FaceNormal)
+3. Pr›v † fiks alt slik av vi kan dele det opp i Stages, med lister.
+   Kanskje f›rst en liste p† objekt niv†, deretter en liste p†
+   Polygon-niv†...
+
+Matrices:
+  World->Camera
+  Object->World
+  Light->World
+
+-----
+
+- Kalkuler alle matriser
+    World->Camera
+    Object->World, Object->Camera
+    Light->World,  Light->Camera
+
+- Sett opp View Frustum planes
+
+- Alle Potentially Visible Objects i Liste (Object Culling)
+    Her bruker vi bounding sphere, og frustum planes for † sjekke om
+    objekt befinner seg innenfor View Frustum, og eventuelt hvilke planes
+    det m† klippes mot.
+    F›rst transformerer vi Bounding Sphere til det WorldSpace, noe som
+    krever at vi setter opp view frustum i WorldSpace.
+
+    Vi sjekker avstanden mellom bounding sphere center og Frustum plane,
+    og sammenligned med bounding sphere size.
+    Hvis bounding sphere er p† baksiden av alle plan, skipper vi objektet.
+    Hvis det er p† forsiden av alle plan, trenger vi ikke klippe mot noen
+    av sidene, siden vi vet at ale polyer i objektet er helt synlig i
+    ViewFrustum
+    Hvos noen Frustum planes intersectes av bounding sphere, merker vi
+    objektet slik at vi bare trenger † klippe mot disse planene (eller
+    sidene etter at vi har projektert til 2D)
+
+- Visible Polys i Liste (RenderList)
+- Sorter RenderList
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+

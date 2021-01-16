@@ -1,0 +1,12 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 00000H 00000H EM3_TEXT           CODE
+ 00000H 015C1H 015C2H CODE               
+ 015D0H 0A30BH 08D3CH DATA               
+ 0A310H 0D073H 02D64H TREDSEGMENT        
+ 0D080H 0D080H 00000H _DATA              DATA
+ 0D080H 0D47FH 00400H STACK              STACK
+
+Program entry point at 0000:1581
+

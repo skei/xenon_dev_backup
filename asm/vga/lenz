@@ -1,0 +1,272 @@
+;-----------------------------------------------------------------------------
+; GenLenz - Renders the Transformation matrix used during animation.
+;
+; Note: The square root is calculated using the Newton iteration
+;       aproximation algorithm:
+;                                        yý + (rý - xý)
+;               yý ð rý - xý  ÍÍ   y ÷ ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+;                                             2y
+;
+;       We performs only one iteration using a initial ®y¯ value
+;       near to the real square root wanted.
+;-----------------------------------------------------------------------------
+
+GenLenz         proc near
+                local    X:word,Y:word,R:word,Dist:Word,AddX:word,AddY:word
+
+                mov      ax,ds
+                mov      es,ax
+                cld
+
+                xor      ax,ax                  ; Fills the whole rectangle
+                lea      di,[LenzTable]         ; matrix with a linear
+                mov      cx,2*RADIUS            ; transformation.
+MakLinLoop:     push     ax
+                push     cx
+                mov      cx,2*RADIUS
+MakLinRow:      stosw
+                inc      ax
+                loop     MakLinRow
+                pop      cx
+                pop      ax
+                add      ax,MAXWIDTH
+                loop     MakLinLoop
+
+                mov      [X],RADIUS             ; makes the scanlines
+                mov      [Y],0                  ; widths of the lenz
+MakWidth:       cmp      [Y],RADIUS             ; with radius RADIUS.
+                jge      MakXWidth
+                mov      ax,[X]
+                mov      bx,RADIUS              ; LenzWidth[Radius+Y] = X
+                add      bx,[Y]
+                shl      bx,1
+                mov      [LenzWidth+bx],ax
+                mov      bx,RADIUS              ; LenzWidth[Radius-Y-1] = X
+                sub      bx,[Y]
+                dec      bx
+                shl      bx,1
+                mov      [LenzWidth+bx],ax
+                mov      ax,[Y]                 ; Xý = Radiusý - Yý
+                imul     ax
+                mov      bx,ax
+                mov      ax,[X]
+                imul     ax
+                sub      ax,bx
+                add      ax,RADIUS*RADIUS
+                sar      ax,1
+                cwd
+                mov      bx,[X]
+                idiv     bx
+                mov      [X],ax
+                inc      [Y]                    ; Y = Y+1
+                jmp      MakWidth
+MakXWidth:
+
+
+                mov     [X],RADIUSI             ; Makes the transformation
+                mov     [Y],0                   ; for the Lenz of radius
+MakLoop:        cmp     [Y],RADIUSI             ; RADIUSY. Notice that
+                jge     MakExit                 ; this lets a border
+                                                ; used for restoring the
+                                                ; background while moving
+                                                ; the lenz into the screen.
+
+                mov     ax,[X]                  ; compute the scanline
+                mov     dx,6                    ; width adjusting with
+                imul    dx                      ; an aspect ratio of 6/5.
+                mov     bx,5
+                idiv    bx
+                mov     [R],ax
+
+                mov     [Dist],0
+                mov     [AddX],0
+                mov     [AddY],ax
+
+MakLine:        mov     ax,[R]
+                cmp     [AddX],ax
+                jge     MakLineBreak
+
+                ; si = @LenzTable[0,RADIUS-Y-1]
+
+                lea     si,[LenzTable]
+                mov     ax,RADIUS
+                sub     ax,[Y]
+                dec     ax
+                imul    ax,2*RADIUS
+                add     si,ax
+                shl     si,1
+
+                ; di = @LenzTable[0,RADIUS+Y]
+
+                lea     di,[LenzTable]
+                mov     ax,RADIUS
+                add     ax,[Y]
+                imul    ax,2*RADIUS
+                add     di,ax
+                shl     di,1
+
+                ; Lenz[RADIUS+AddX,RADIUS-Y-1] = RADIUS+Hi(Dist) +
+                ;     MAXWIDTH * (RADIUS-1-STRENGH*Y)
+
+                mov     bx,RADIUS
+                add     bx,[AddX]
+                shl     bx,1
+                mov     ax,[Y]
+                imul    ax,STRENGH
+                sar     ax,8
+                imul    ax,MAXWIDTH
+                neg     ax
+                add     ax,RADIUS+MAXWIDTH*(RADIUS-1)
+                mov     dx,[Dist]
+                shr     dx,8
+                add     ax,dx
+                mov     [si+bx],ax
+
+                ; Lenz[RADIUS-AddX-1,RADIUS-Y-1] = RADIUS-Hi(Dist)-1+
+                ;     MAXWIDTH * (RADIUS-1-STRENGH*Y)
+
+                mov     bx,RADIUS
+                sub     bx,[AddX]
+                dec     bx
+                shl     bx,1
+                mov     ax,[Y]
+                imul    ax,STRENGH
+                sar     ax,8
+                imul    ax,MAXWIDTH
+                neg     ax
+                add     ax,RADIUS+MAXWIDTH*(RADIUS-1)
+                mov     dx,[Dist]
+                shr     dx,8
+                sub     ax,dx
+                dec     ax
+                mov     [si+bx],ax
+
+                ; LenzTable[RADIUS+AddX,RADIUS+Y] = RADIUS+Hi(Dist)+
+                ;    MAXWIDTH * (RADIUS + STRENGH*Y)
+
+                mov     bx,RADIUS
+                add     bx,[AddX]
+                shl     bx,1
+                mov     ax,[Y]
+                imul    ax,STRENGH
+                sar     ax,8
+                imul    ax,MAXWIDTH
+                add     ax,RADIUS+MAXWIDTH*RADIUS
+                mov     dx,[Dist]
+                shr     dx,8
+                add     ax,dx
+                mov     [di+bx],ax
+
+                ; LenzTable[RADIUS-AddX-1,RADIUS+Y] = RADIUS-Hi(Dist)-1+
+                ;    MAXWIDTH * (RADIUS+STRENGH*Y)
+
+                mov     bx,RADIUS
+                sub     bx,[AddX]
+                dec     bx
+                shl     bx,1
+                mov     ax,[Y]
+                imul    ax,STRENGH
+                sar     ax,8
+                imul    ax,MAXWIDTH
+                add     ax,RADIUS+MAXWIDTH*RADIUS
+                mov     dx,[Dist]
+                shr     dx,8
+                sub     ax,dx
+                dec     ax
+                mov     [di+bx],ax
+
+                ; Dist = Dist + (Strengh*Radius)/dY
+
+                mov     ax,STRENGH*RADIUS
+                cwd
+                mov     bx,[AddY]
+                idiv    bx
+                add     [Dist],ax
+
+                mov     ax,[AddY]               ; dYý = Rý - dXý
+                imul    ax
+                mov     bx,ax
+                mov     ax,[AddX]
+                imul    ax
+                sub     bx,ax
+                mov     ax,[R]
+                imul    ax
+                add     ax,bx
+                sar     ax,1
+                cwd
+                mov     bx,[AddY]
+                idiv    bx
+                mov     [AddY],ax
+                inc     [AddX]                  ; dX = dX+1
+                jmp     MakLine
+
+MakLineBreak:   mov     ax,[X]                  ; Xý = Radius'ý - Yý
+                imul    ax
+                mov     bx,ax
+                mov     ax,[Y]
+                imul    ax
+                sub     bx,ax
+                mov     ax,RADIUSI*RADIUSI
+                add     ax,bx
+                sar     ax,1
+                cwd
+                mov     bx,[X]
+                idiv    bx
+                mov     [X],ax
+                inc     [Y]                     ; Y = Y+1
+                jmp     MakLoop
+MakExit:        ret
+
+GenLenz         endp
+
+;-----------------------------------------------------------------------------
+; WriteLenz - Writes the Lenz using the transformation matrix.
+; In:
+;  DI  - Starting offset location of the lenz.
+;  DX  - Virtual picture used like background.
+;-----------------------------------------------------------------------------
+
+WriteLenz       proc near
+
+                push    bp
+                mov     ax,0A000h
+                mov     es,ax
+                lea     bx,[LenzTable]
+                lea     si,[LenzWidth]
+                mov     bp,di
+                mov     cx,2*RADIUS
+                cld
+WriteLoop:      push    bx
+                push    cx
+                push    si
+                push    di
+                cmp     di,MAXWIDTH*MAXHEIGHT
+                jae     WriteBreak
+                mov     cx,[si]                 ; gets the scanline width.
+                mov     ax,RADIUS
+                sub     ax,cx
+                add     di,ax
+                add     bx,ax
+                add     bx,ax
+WriteLine:      push    es
+                mov     es,dx
+                mov     si,[bx]
+                mov     al,es:[bp+si]
+                mov     si,[bx+2]
+                mov     ah,es:[bp+si]
+                add     bx,4
+                pop     es
+                stosw
+                loop    WriteLine
+WriteBreak:     pop     di
+                pop     si
+                pop     cx
+                pop     bx
+                add     bx,4*RADIUS
+                add     si,2
+                add     di,MAXWIDTH
+                loop    WriteLoop
+                pop     bp
+                ret
+
+WriteLenz       endp

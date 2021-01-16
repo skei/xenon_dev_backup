@@ -1,0 +1,17 @@
+System: Dos32 v3.3
+Player: Noice Music System
+
+Ferdige Rutiner:    EnvMap
+                    BumpMap
+                    RotoZoom (Roto, Zoom)
+                    Tunell
+                    Pixel Writer
+                    Wobble Tunell
+                    Wobbling
+
+Kan lages kjapt:    Phong Texture
+                    Z-buffer texture/envmap/gouraud
+                    Voxel??
+
+
+

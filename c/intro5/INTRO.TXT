@@ -1,0 +1,30 @@
+Greetings ( 1 screen, flash)
+
+inf'97
+pants
+axon
+bitbrat
+digitus
+fndr/peak
+tmk
+
+3 background images (160x100)
+
+-----------------------------------------------------------------------------
+
+- Voxel
+- Rotozoom/recursive
+- 2d blobs
+- julia fractal
+- 2d bump
+- zoomblur
+
+-----------------------------------------------------------------------------
+
+Now:
+
+MXM player
+VBE2 routines
+module
+support routines
+math routines

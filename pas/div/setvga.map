@@ -1,0 +1,9 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 0000EH 0000FH SETVGA_TEXT        CODE
+ 00010H 00010H 00000H _DATA              DATA
+ 00010H 0040FH 00400H STACK              STACK
+
+Program entry point at 0000:0000
+

@@ -1,0 +1,6 @@
+1. Texture-Triangle... Fix s† den er klar for BumpMap/Phong+TExture/Gouraud
+2. Rotation: 3x3 matrix... 9 IMUL's
+3. Sortering....
+4. Gjennomgang...
+
+

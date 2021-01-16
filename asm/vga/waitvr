@@ -1,0 +1,16 @@
+;-----------------------------------------------------------------------------
+; WaitVR - Waits the Next VGA Vertical Retrace Ending.
+;-----------------------------------------------------------------------------
+
+proc    WaitVR
+        mov     dx,3DAh
+WaitStartVR:
+        in      al,dx
+        test    al,8
+        je      WaitStartVR
+WaitEndVR:
+        in      al,dx
+        test    al,8
+        jne     WaitEndVR
+        ret
+endp    WaitVR

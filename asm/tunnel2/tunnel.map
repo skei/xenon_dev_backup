@@ -1,0 +1,11 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 0132EH 0132FH TUNNEL_TEXT        CODE
+ 01330H 0902FH 07D00H ODSEG              
+ 09030H 1902FH 10000H TEXTURESEG         
+ 19030H 1932FH 00300H _DATA              DATA
+ 19330H 1972FH 00400H STACK              STACK
+
+Program entry point at 0000:12FE
+

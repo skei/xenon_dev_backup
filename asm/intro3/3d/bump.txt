@@ -1,0 +1,21 @@
+EAX Texture/Phong
+EBX Bump
+ECX
+EDX
+ESI LeftInt:RightFrac
+EDI RightFrac:LeftInt
+EBP Screen-pos
+
+
+Inner:
+ xor ecx,ecx
+ shld ecx,ebx,8
+ mov ch,bh
+
+ mov edx,ecx        ; EDX = Bump-index
+
+ xor ecx,ecx
+ shld ecx,eax,8
+ mov ch,ah
+ add cx,[Bump+edx]
+ mov dl,[

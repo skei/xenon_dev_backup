@@ -1,0 +1,631 @@
+
+                        Advanced Music System (AMS)
+                        ---------------------------
+                                Revision 1.0
+
+
+1.0 - Introduction
+------------------
+
+This is the player routine for our music system that let you play AMS,MOD,
+S3M,STM,XM,MTM and ULT in your own productions. You may use this as long as
+you give me (Patrik Oscarsson (aka Baldric) of Velvet Development) credits
+for the player.
+
+
+This new version of the system is improved alot since the last release,
+mainly because of the new music system with a better replayroutine. One
+other big improvement is that you can allocate/disallocate the memory
+instead of having a fixed memory chunk. The system has been thoroughly
+tested, but it can of course still contain bugs. In that case contact
+Baldric.
+
+
+
+1.1 - Programming notes.
+------------------------
+
+To be able to use this player you must code in Protected Mode.
+We support two different systems:
+DOS32, made by Adam Seychell. (Currently v3.4)
+PMODE, v2.51, made by Thomas Pytel
+
+Those files can be found on any programming related FTP site.
+
+DOS32V34.ZIP (I don't know if there's an official release of this one yet.)
+PMODE251.ZIP
+
+
+The directory listing:
+
+ÃÄPMODE:............... Pmode System Files and main player files
+³ ÃÄNORMAL:............ The Normal Version of the player
+³ ÃÄLITE:.............. The Lite version of the Pmode Player
+³ ÀÄEXTRA:............. The Extra Lite Version.
+ÀÄDOS32:............... DOS32 System Files and main player files
+  ÃÄNORMAL:............ The Normal Version of the player
+  ÃÄLITE:.............. The Lite version of the DOS32 Player
+  ÀÄEXTRA:............. The Extra Lite Version.
+
+
+There are different versions of the player available, depending on your
+purpose:
+
+Normal:
+ This is the complete player that lets you play all included formats.
+
+Lite:
+ This version only allows you to play AMS v2.2 modules (the latest version)
+ There's also a limit of 64 Instruments to be able to save some space.
+
+Extra:
+ This version is the smallest and is the same as the Lite version, but it
+ can only handle AMIGA Freq. Hence Linear frequency can NOT be used.
+
+
+
+* The EXE file becomes quite big when compiling, but don't worry, just
+  use the -C switch when linking with DLINK and it'll shrink alot.
+  If you use Pmode, just use PKLITE, PROPACK, LZEXE or similar to compress
+  the EXE file.
+
+  Do you still think it's big? Then have in mind that the system is very
+  complex!
+
+
+* What are the different files needed for??
+
+DOS32:
+  dos32.inc    -  Include file for all asm files.
+  io_dos32.asm -  Input/Output routines for DOS32. Source.
+  amsplay.obj  -  The Music System.
+  amsshell.obj -  The shell that communicates with the Music System.
+  play.asm     -  The player.
+  pn.bat       -  A batch file that creates the Normal Player
+  pl.bat       -  A batch file that creates the Litel Player
+  pe.bat       -  A batch file that creates the Extra Lite Player
+
+PMODE:
+  pmode.inc    -  Include file for all asm files.
+  io.asm       -  Input/Output routines for PMODE. Source.
+  amsplay.obj  -  The Music System.
+  amsshell.obj -  The shell that communicates with the Music System.
+  play.asm     -  The player.
+  pn.bat       -  A batch file that creates the Normal Player
+  pl.bat       -  A batch file that creates the Litel Player
+  pe.bat       -  A batch file that creates the Extra Lite Player
+  pm.bat       -  A batch file that creates the Protected mode system.
+
+
+1.2 - Copyright notice
+----------------------
+
+This program is copyrighted 1994-96 by Velvet Development. All rights reserved.
+
+   * You may not sell this player stand-alone, but you CAN use it in any of
+     your non-commersial productions (e.g. Demos, Music disks etc) without
+     worrying about royalties and such stuff. If you want to use it
+     commercially, please contact Velvet Development for a minimum royalty fee.
+   * Modifications in any of the distributed .OBJ files and documents
+     are strictly prohibited!
+   * The distributor of the player itself may only charge a fee up to the costs
+     of the public domain disk and/or the postage fee.
+   * On request of the author, the distributor agrees to stop distributing
+     the player and data involved.
+   * Disassembling, decompiling, re-sourcing or otherwise reverse
+     engineering the player is not allowed.
+
+By copying, distributing and/or using the program you indicate your
+acceptance of the above rules.
+
+1.3 - Disclaimer
+----------------
+
+There is no warranty for the program, to the extent permitted by applicable
+law. Except when otherwise stated in writing the copyright holders and/or
+other parties provide the program "as is" without warranty of any kind,
+either expressed or implied, including, but not limited to, the implied
+warranties of merchantability and fitness for a particular purpose. The
+entire risk as to the quality and performance of the program is with you.
+Should the program prove defective, you assume the cost of all necessary
+servicing, repair or correction.
+
+In no event unless required by applicable law or agreed to in writing will
+any copyright holder, or any other party who may redistribute the program
+as permitted above, be liable to you for damages, including any general,
+special, incidental or consequential damages arising out of the use or
+inability to use the program (including but not limited to loss of data or
+data being rendered inaccurate or losses sustained by you or third parties
+or a failure of the program to operate with any other programs), even if
+such holder or other party has been advised of the possibility of such
+damages.
+
+
+2.0 - Functions
+---------------
+
+The following variables are available in the system at the moment:
+
+
+Initialization variables (Must be set BEFORE calling AMS_Init)
+------------------------
+
+*  SoundCard
+   Set this to desired SoundCard
+
+   0=No Sound
+   1=GUS
+   2=SB Pro
+   3=SB 16
+   4=SB
+
+*  SoundCard_BasePort
+   Set this to the Baseport of your SoundCard. (e.g. 220h)
+    GUS ONLY: If the variable is omitted the port is autodetected.
+
+*  SoundCard_DMA1
+   GUS: This is the only DMA channel needed. It is used to transfer
+        samples to the DRAM. Set to 0 if you don't want DMA transfer.
+   SB:  This is the 8 bits DMA channel. Use this for 8 bits transfers.
+
+*  SoundCard_DMA2
+   GUS: Unused.
+   SB:  This is the 16 bits DMA channel. Use this for 16 bits transfers.
+
+*  SoundCard_IRQ
+   Set this to an appropriate IRQ.
+
+*  TimerSelect (GUS ONLY)
+   Put 0 here to use the PC timer and 1 to use GUS timer. (def 0)
+
+*  PlayFreq (SB Only)
+   This is the frequency that the SB mixing routine uses. Higher value
+   means better quality, but it also consumes more CPU power. (def 45454)
+
+*  SB_StereoAllowed (SB Only)
+   Set this variable to 1 if you want to enable Stereo. (def 1)
+
+*  SB_16BitsAllowed (SB 16 Only)
+   Set this variable to 1 if you want 16 bits Mixing (def 1)
+
+*  Amplification (SB only)
+   This variable is used to amplify the 8 bits output. Set this to a proper
+   value depending on the tune. On a SB 16, this variable controls the
+   Output Gain. Valid values are 16-255. (Def 60h)
+
+
+*  LoadFXEngine
+   Set this variable to 1 if you want to enable the FX engine. An Explanation
+   of this engine is coming later in this file.
+
+   See also procedure AMS_DetectSoundCard
+
+
+The following table defines valid values for the SoundCards.
+
+ÚÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÂÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³ Card  ³ Stereo  ³ Mono    ³ Ports               ³ DMA 1 ³ DMA 2 ³ IRQ        ³
+³       ³ Max Freq³ Max Freq³                     ³       ³       ³            ³
+ÃÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÅÄÄÄÄÄÄÄÄÄÄÄÄ´
+³ GUS   ³  N/A    ³  N/A    ³ 210h,220h,230h,240h,³ 1,3,  ³ ----- ³ 2,3,5,7,11,³
+³       ³         ³         ³ 250h,260h           ³ 5,6,7 ³       ³ 12,15      ³
+³ SB    ³  N/A    ³ 22222   ³ 220h,240h           ³ 1     ³ ----- ³ 2,3,5,7,10 ³
+³ SB Pro³ 22727   ³ 45454   ³ 220h,240h           ³ 1,3   ³ ----- ³ 2,3,5,7,10 ³
+³ SB 16 ³ 45454   ³ 45454   ³ 220h,240h,260h,280h ³ 1,3   ³ 5,6,7 ³ 2,5,7,10   ³
+ÀÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÁÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+
+
+Music Synchronization
+---------------------
+
+*  Sync_Byte
+   Using the command 3fxx in the song will put the xx value into this
+   variable, Great for waiting at music events.
+
+*  CallRoutine
+   This Variable is a Pointer to a code that you want to be called
+   approx. 102.4013045 times per sec... You can redefine this at any
+   point in your code. Putting the value 0 into it will disable the
+   function. This is the heart of any well made production since it will
+   make the routines to look equally fast on every computer (maybe not as
+   smooth of course). Don't put too much code here!!! You may only update
+   some variables, e.g. vector rotation angles. Too much code will slow down
+   the system since it's called in the ISR.
+
+Playing Information
+-------------------
+*  CurrRow
+   This variable contains the current row the player is on in the pattern.
+
+*  CurrPosition
+   The current position in the song.
+
+*  CurrPatt
+   The current pattern played.
+
+*  Vol[32]
+   This array contains the actual volume values for all channels. This may
+   be altered, e.g. decreasing the values at a constant rate to make
+   volume bars.
+
+Song Information
+----------------
+*  Composer[30]
+   The name of the composer, if used.
+
+*  SongName[30]
+   The name of the song, if used.
+
+*  MasterVolume
+   The current master volume of the song, should be Read Only. To change the
+   master volume, use the Procedure "AMS_MasterVolume".
+
+Other Variables
+---------------
+*  PositionJump
+   Set this to a proper position whenever you want to jump in the music.
+   (Most often used in conjunction with GotoRow)
+
+*  GotoRow
+   Set this to a desired value when you want to change playing row in the song.
+
+*  MemoryFree
+   The amount of memory free to use.
+
+*  Positions
+   The total amount of poitions used in song.
+
+
+The following routines are available in the system at the moment:
+
+
+Init Procedures
+---------------
+
+*  AMS_DetectSoundCard
+   Calls:   None
+   Return:  Carry=1 if no Card not found.
+   Does:    First checks for GUS environment, and then for SB.
+            Reads the Environment variable and sets all init variables to
+            Correct values. If you want to use Nosound, then skip the
+            CF check.
+            This Procedure must be called before AMS_Init to affect the
+            settings!
+
+   Example:
+            call        AMS_DetectSoundCard
+            jc          EnvNotFound         ;If Carry set, NoSound is enabled
+
+*  AMS_Init
+   Calls:   None
+   Does:    Inits the music system, allocates memory, etc.
+            This must be called before you can allocate memory,
+            use the diskroutines, load a song, etc. Basically, this
+            is the first thing you do in the code (except for
+            setting up the soundcard info)
+
+   Example:
+            call        AMS_Init
+
+Loading Procedures
+------------------
+*  AMS_ReadCommandLine
+   Calls:   EDX -> buffer
+   Does:    Reads the CommandLine and put the result in the buffer specified
+            by edx.
+
+
+   Example:
+            lea         edx,Songname
+            Call        AMS_ReadCommandLine
+
+
+
+*  AMS_LoadModule
+   Calls:   EDX -> Songname
+            [LoadOffset]
+   Does:    Loads the Song that edx points at into memory. If the variable
+            LoadOffset is set to a value, the loader will start reading
+            from (the end of the file-LoadOffset). That way you can have
+            the module copied onto the EXE file and load the song from the
+            end of the EXE file. You can of course have multiple files
+            after eachother; just sum the filesizes together.
+
+   Example:
+            lea         edx,Songname
+            mov         LoadOffset,38564        ;The size of the Songfile
+            Call        AMS_LoadModule
+
+
+Playing Procedures
+------------------
+*  AMS_StartModule
+   Calls:   None
+   Does:    Start the playing of the current loaded module.
+
+   Example:
+            Call        AMS_StartModule
+
+*  AMS_StopModule
+   Calls:   None
+   Does:    Stops the playing of the current playing module.
+
+   Example:
+            Call        AMS_StopModule
+
+
+*  AMS_PauseModule
+   Calls:   None
+   Does:    Pauses the playing of the current playing module.
+            Does NOT Change the volume, so setting the MasterVolume
+            to zero is recommended.
+
+   Example:
+            Call        AMS_PauseModule
+
+
+*  AMS_UnPauseModule
+   Calls:   None
+   Does:    Resumes the playing of the current paused module.
+            Does NOT Change the volume, so re-setting the MasterVolume
+            is recommended if you ever changed it.
+
+   Example:
+            Call        AMS_UnPauseModule
+
+
+*  AMS_MasterVolume
+   Calls:   AL = Volume (0-127)
+   Does:    Changes the MasterVolume of the current playing song.
+            If you want to read the current MasterVolume, that value
+            is stored in "MasterVolume"
+
+   Example:
+            mov         al,60
+            call        AMS_MasterVolume
+
+
+
+Other Procedures
+----------------
+
+*  AMS_MemAlloc
+   Calls:   EBP: Handle
+            EAX: Wanted Memory size (eax=0 disallocates the mem instead)
+            EBX: 1=Clear new mem area, 0=Don't clear.
+            EDI: MemPtr
+   Return:  Carry: 1=Not enough memory!, 0=Allocation went ok.
+            [edi]: Offset to allocated memory
+
+   Does:    Allocates/Disallocates memory.
+            In this version of the modsystem, a new improved allocation
+            routine is available. It allows you to allocate, disallocate
+            and resize the memory. The way you communicate with the allocation
+            routine is very simple:
+            1. Specify a handle for the memory area you wanna access (in ebp)
+               (You can use up to 32 handles (0-31))
+            2. Set a flag that tells the routine whether it should erase
+               the new memory or not. (ebx)
+            3. Specify how much memory you want (in eax)
+            4. The pointer to the variable where the offset will be stored.(edi)
+
+            To get the offset to your memory you MUST use the MemPtr you
+            defined when allocating. This is needed since the allocation
+            routines may reorganize the memory, and the only place the
+            actual offset is stored is in that variable. Be careful that you
+            don't use any other pointers that aren't relative to the beginning
+            of the allocated buffer, or else you'll get into trouble :)
+
+            TIP: For easy handling of the AllocHandles, make an EQU of
+                 the handle: e.g. PictureHandle EQU 0, and then use that
+                 instead of the value "0"
+
+
+   Example:
+            mov     ebp,0                   ;Handle #0
+            mov     ebx,1                   ;Clear unused area
+            mov     eax,10000               ;Allocate 10000 bytes
+            lea     edi,MemPtr              ;Put the MemPtr in this variable
+            call    AMS_MemAlloc
+            jc      NotEnoughMemory
+            .
+            .
+
+            .
+            .
+            mov     ebp,0                   ;Handle #0
+            mov     ebx,1                   ;Clear unused area
+            mov     eax,40000               ;Resize to 40000 bytes
+            lea     edi,MemPtr              ;Put the MemPtr in this variable
+            call    AMS_MemAlloc
+            jc      NotEnoughMemory
+            .
+            .
+
+
+            .
+            .
+            mov     ebp,0                   ;Handle #0
+            xor     eax,eax                 ;Disallocate area
+            lea     edi,MemPtr              ;Memory pointer
+            call    AMS_MemAlloc
+
+
+*  AMS_ShutDown
+   Calls:   None
+   Does:    Resets the musicsystem and eveything else needed.
+            Should only be used just before leaving the program.
+
+   Example:
+            Call        AMS_ShutDown
+
+
+*  AMS_ErrorHandler
+   Calls:   None
+   Does:    See below
+
+
+
+FX Engine
+-------------------
+ When creating applications like games, you often want to play some sound
+ effects synchronized with the story. In this package there are some
+ routines included to accomplish this. If the variable FXEngine is set to 1
+ before calling AMS_INIT, the FX engine is initialized. When enabled, any
+ module loaded will get 4 more channels used for effects.
+ WARNING: Never use more than 28 channels in a tune if you want to use the
+ engine, since the music system can only handle 32 channels.
+ The 3 first FX channels are used with samples that are loaded with the
+ tune, and the 4:th is a special sample channel.
+
+
+* FXEngine
+  Calls:    EBX = Sample # (16-4095)
+            EDI = Channel (0-2)
+            AL  = Panpot (000h-0f0h, only high nibble used)
+            AH  = Note (0-119) (NoteOff=-1)
+            CL  = Volume (0-127)
+
+  Does:     This routine will play a sample that is included in the song.
+            This is an easy way of inluding effects, since you don't have
+            to bother with loading the sample to memory, since that's done
+            when loading the song. The sample number is the actual sample
+            being played. Since an instrument can consist of 16 samples the
+            sample numbers can range from 16 to 4096. To play instrument 5,
+            set ebx to 5*16.
+
+  Example:
+
+            mov     ebx,23h*16      ;Instrument 23h
+            mov     edi,1           ;FX channel 1
+            mov     al,070h         ;Middle Pan
+            mov     ah,48           ;Note C4
+            mov     cl,127          ;Max volume
+            call    FXEngine        ;Play it!
+
+* SpeechEngine
+  Calls:    EAX = Bits (0=8 bits, 1=16 bits)
+             BL = Note (0-119)
+            ECX = Size of sample to play (in bytes)
+            EDX = C4 rate of sample
+            ESI = Pointer to sample buffer
+
+  Does:     This routine lets you play any sample on a separate channel.
+            It's great for use with long speech samples or similar.
+            You first have to load the sample into memory manually before
+            you can get anything out of this routine.
+            Note. This routine expects SIGNED samples.
+
+  Example:
+            mov     ebp,SampHand            ;Alloc Handle #
+            mov     ebx,1                   ;Clear unused area
+            mov     eax,SampSize            ;Allocate the size of the sample
+            lea     edi,SamplePtr           ;Pointer to Memory to store it
+            call    AMS_MemAlloc            ;Allocate the memory
+            lea     edx,SampleName          ;Load sample
+            call    _OpenFileR
+            mov     ecx,SampSize
+            mov     edx,SamplePtr
+            call    _ReadFile
+            call    _CloseFile
+            .
+            .
+            .
+
+            .
+            .
+            .
+            mov     eax,1                   ;1 for 16 bits samples
+            mov     bl,6*12                 ;C6
+            mov     ecx,SampSize            ;The size of the sample
+            mov     edx,8363                ;C4 Rate
+            mov     esi,SamplePtr           ;Pointer to Sample in Mem
+            call    SpeechEngine            ;Play it.
+
+
+
+* StopSpeech
+  Calls:    None
+
+  Does:     This routine stops the current playing Speech Sample.
+
+  Example:
+            Call    StopSpeech
+
+
+* CheckSpeech
+  Calls:    None
+  Return:   CF set=Stop, CF clear=Playing
+
+  Does:     Checks if the current Speech Sample is playing or stopped.
+
+  Example:
+            Call    CheckSpeech
+
+
+
+
+
+2.1 - Error Handler
+-------------------
+ If some error occurs in the AMS_ routines, the procedure called
+ "AMS_ErrorHandler" gets control over the situation, and it's up to you to
+ correct the error by displaying a error message or whatever is needed.
+
+ When the errorhandler gets control, ESI points to a text describing the error
+ and EBX contains an error number. The following table explains EBX:
+ (It may be odd to not have all numbers represented, but in the tracker more
+  errors are available, and I just removed the unnecessary ones)
+
+EBX     Explanation
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+02h     Not Enough Low Memory (fatal)
+04h     Not Enough High Memory (fatal)
+
+0ah     Not Enough High Memory (Dangerous)
+0bh     Not Enough GUS Memory, Some samples aren't loaded
+0dh     FileError
+0fh     Not Enough High Memory (Not Dangerous)
+10h     Not Enough GUS Memory
+11h     OpenFile Error
+12h     SeekFile Error
+13h     ReadFile Error
+14h     No Loadable Module
+15h     Bad Version of module
+18h     CloseFile Error
+19h     SizeFile Error
+1dh     Old XM File
+1eh     IRQ DMA TimeOut Error
+
+
+
+3.0 - Problems?
+---------------
+
+* There might be a bug using the DMA with DOS32. I've told Adam this several
+  times, but it is still not fully fixed.
+
+If you encounter any problems, feel free to contact Baldric. (preferably by
+E-Mail)
+
+   Patrik Oscarsson
+   Hermansvagen 44
+   554 53 Jonkoping
+   Sweden
+
+  Voice:  +46(0)36-711593
+  E-Mail: da94ospa@hj.se
+  IRC:    Baldric (mostly on #coders)
+
+
+3.1 - Credits
+-------------
+
+The Music System is developed and coded by Baldric of Velvet Development.
+The SoundBlaster Routines are made by Carlos Hasan
+DOS32 protected mode system is made by Adam Seychell
+PMODE protected mode system is made by Thomas Pytel
+
+
+

@@ -1,0 +1,16 @@
+;-----------------------------------------------------------------------------
+; SetStartAddr - Sets the VGA Start Address Register.
+; In:
+;  BX = Start Address.
+;-----------------------------------------------------------------------------
+
+proc	SetStartAddr
+	mov	dx,3D4h 		; Sets VGA Start Address
+	mov	al,0Dh
+	mov	ah,bl
+	out	dx,ax
+	dec	al
+	mov	ah,bh
+	out	dx,ax
+	ret
+endp	SetStartAddr

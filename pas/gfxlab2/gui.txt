@@ -1,0 +1,9 @@
+Items:
+
+
+QWEQWEQWEQWE <- Input Field
+qweqweqweqwe <- Text lines in DOWN box
+qweqweqweqwe
+qweqweqweqwe
+qweqweqweqwe
+           <- 2 buttons, to move list up/down

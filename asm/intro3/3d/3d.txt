@@ -1,0 +1,17 @@
+ş Rotering - 6/7 imul's
+ş Radix Sort - i en eller annen folder i QWK-dirret
+  eller Z-Buffer
+ş Object Blocks
+
+Object Blocks
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Object1:
+ NumCoords dw ?
+ NumPolys dw ?
+ Coords dd ?        ; Pointer to Coordinate data
+ Polys dd ?         ;            Polygon
+ Normals dd ?                    Normal
+ vx,vy,vz dw ?      ; Rotation angles
+ px,py,pz dw ?      ; Position
+
+

@@ -1,0 +1,32 @@
+;-----------------------------------------------------------------------------
+; FlashIn - Flash fade-in effect.
+; In:
+;  Palette - Source palette.
+;-----------------------------------------------------------------------------
+
+FlashIn         proc near
+
+                mov     ax,ds
+                mov     es,ax
+                cld
+                lea     di,[FromPalette]        ; fade from black to white.
+                mov     cx,768
+                mov     al,00h
+                rep     stosb
+                lea     di,[ToPalette]
+                mov     cx,768
+                mov     al,3Fh
+                rep     stosb
+                call    FadeTo
+                lea     di,[FromPalette]        ; fade from white to
+                mov     cx,768                  ; destination palette.
+                mov     al,3Fh
+                rep     stosb
+                lea     si,[Palette]
+                lea     di,[ToPalette]
+                mov     cx,768
+                rep     movsb
+                call    FadeTo
+                ret
+
+FlashIn         endp

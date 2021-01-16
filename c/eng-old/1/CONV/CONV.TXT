@@ -1,0 +1,9 @@
+Konverter.... Husk at objektet m† v‘re "mapped"...
+Se p† sourcen s† skj›nner du nok hvordan den funker... Og ogs† p†
+Object_Load (eller Object_LoadFile) i engine.c....
+
+Skal se om jeg f†r satt sammen en VBE2 c/h/exe med b†de bat-fil for
+kompilering linking, og make file, som garantert funker..... ???
+
+axon
+

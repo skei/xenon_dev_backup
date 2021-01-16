@@ -1,0 +1,10 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 0010CH 0010DH BABYTRO_TEXT       CODE
+ 00110H 00977H 00868H _DATA              DATA
+ 00980H 00D7FH 00400H STACK              STACK
+ 00D80H 1077FH 0FA00H BABYSEG            
+
+Program entry point at 0000:00C9
+

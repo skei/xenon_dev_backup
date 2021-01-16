@@ -1,0 +1,20 @@
+Xoffset = Sin(x)
+YOffset = Sin(y)
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+for y := 0 to 255 do
+begin
+ XSinus = XOUter
+ YSinus = YOuter
+ for x := 0 to 255 do
+ begin
+  xpos = sin(Xsinus)
+  inc(XSinus,xaddinner)
+  Ypos = sin(YSinus)
+  inc(YSinus,yaddinner)
+  pixel = texture(xpos,ypos)
+  pset(x,y,pixel)
+ end;
+ inc(Xouter,xouteradd);
+ inc(Youter,youteradd);
+end;
+

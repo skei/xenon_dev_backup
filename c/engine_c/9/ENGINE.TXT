@@ -1,0 +1,57 @@
+Implementation notes:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ş I made everything in the classes public, a no-no in OOP, I know, but I
+  am more concerned about speed and effenciency than proper OOP. Perhaps I
+  will go back and change all this to more proper OOP later on...
+
+ş About the sorting.... ByteSort, sorting positive 16-bit integer Z values
+  are used.. Perhaps I should try to sort the float values directly (read
+  from memory as integers - work as long as they all have the same sign),
+  and sorting in two more passes?
+  Or have a linked list, and search for the correct place for the polygon.
+  Have a pointer, like, LastInserted, check he Z there, and go forward or
+  backward.... Polys in objects usually have similar Z values, so there
+  shouldn't be too many searching steps (i know this method is used in
+  SWIV, and on the PlayStation)
+
+ş Instead of having the Vertex Narmals stored in the Vertex
+  class/structure, I decided to have three pointers in the Polygon class..
+  These three usually point to the same normals as if the normals have
+  been placed along the vertices...
+  The reason is that I want to have the possibility to have a separate
+  normal for each polygon sharing the same vertex - for smoothing groups,
+  and for fixing UV wrapping bugs... Now I can allocate a new Vertex
+  Normal, and have the relevant vertex in the polygon point to the new one
+  instead of the other...
+  Also for smoothing groups: Polygons NOT in the same smoothing groups
+  shouldn't share the same vertex normal for shading, etc...
+
+Notes / Ideas /ToDos:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ş Polys without mapping should be rendered using Gouraud shading only, or,
+  use a texture map 1x1 pixels or something, with the face color.
+
+ş After testing the bounding sphere against the frustum planes, mark which
+  ones it intersects, if any.. And only clip the polys in the object
+  against these sides.... 3D Z-clipping for Near Plane, 2D clipping for
+  the sides...
+
+ş Inversely transform lights back to object space for shading
+  calculations, to avoid rotating all the normals... At the time of light
+  calc, the visible vertices are known, so we only need a dot prod for
+  those...
+
+ş BackFace cull polys AFTER projecting to view space... If we should
+  back-transform the camera to object-space, a 3d dot prod would be
+  needed, and, if we optimize the matrix calc to use only 6 muls, it would
+  be just as fast to transform all vertices, then check the direction of
+  the Z-part of the normal....
+
+ş S-buffers? Problem: there could be a LOT OF spans in a complex scene, a
+  lot of span sorting and splitting... Advantage: correct sorting, no
+  over-draw (good for perspective texture, etc), easier
+  low-level poly-filler...
+
+ş AET... Look more into this... Seems interesting...

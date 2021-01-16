@@ -1,0 +1,24 @@
+class					data							methods
+
+bitmap
+point3d
+vector        3d-vector         vector operations
+matrix				4*4 matrix
+quaternion    quaternion
+spline        spline
+keyframe
+vertex
+polygon
+material
+map
+node          hierarchy-node
+node/camera
+node/light
+node/mesh
+node/dummy
+scene
+render        rendering stuff
+
+.............................................................................
+
+

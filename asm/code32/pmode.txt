@@ -1,0 +1,42 @@
+Tips & Tricks i P-Mode:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Clipping:
+
+Ha et buffer p† 512 x 300
+Left & Rightborder  = 96
+Top & Bottom        = 50
+
+Gi faen i Clipping i rutinene, sjekk bare om linja/polyet er helt
+utenfor border, og glem den helt hvis den er det...
+
+Y * 512 er jo simpelt : SHL 9
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+MACROER:
+
+ip8 (interpolate 8.8)
+
+ip8 MACRO
+ sub ax,bx  ; ax = width (end-start)
+ cwd
+ idiv cx    ; delt p† antall
+ shl bx,8   ; bx = value
+@@
+ mov [edi],bh
+ add edi,adder
+ add bx,ax
+ dec cx
+ jnz @@
+ENDM
+
+og en likedan for ip16
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Slope-table
+
+istedenfor
+x2-x1     x
+----- -> ---
+y2-y1     y
+
+Eller; 1/x tabell...
+
+A/B = A * Tabell(B)

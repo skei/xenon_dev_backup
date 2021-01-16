@@ -1,0 +1,83 @@
+                                        ; vector rotation procedure
+                                        ; clock cycles used:
+                                        ; 80286: 465          80386: 264
+                                        ; BX = X   CX = Y   BP = Z
+rotate     proc near
+                                        ; X-rotation
+                                        ; Y := cos(vx) * y - sin(vx) * z
+                                        ; Z := sin(vx) * y + cos(vx) * z
+           mov si,cs:vx
+           shl si,1                     ; si = angle x
+           mov ax,cs:cosinus[si]        ; ax = cosinus(angle x)
+           imul cx                      ; ax = cos(angle x) * y
+           mov di,ax                    ; store for later use
+           mov ax,cs:sinus[si]          ; ax = sinus(angle x)
+           imul bp                      ; ax = sin(angle x) * z
+           sub di,ax                    ; di = di-ax = cos(vx)*y - sin(vz)*z
+           sar di,8                     ; remove the (co)sin "256-factor"
+           mov es,di                    ; es = x-coordinate
+
+           mov ax,cs:sinus[si]          ; ax = sinus(angle x)
+           imul cx                      ; ax = sin(angle x) * y
+           mov di,ax
+           mov ax,cs:cosinus[si]        ; ax = cosinus(angle x)
+           imul bp                      ; ax = cos(angle x) * z
+           add di,ax                    ; di = di-ax = sin(vx)*y + cos(vx)*z
+           sar di,8                     ; remove the (co)sin "256-factor"
+
+           mov cx,es                    ; update y
+           mov bp,di                    ; update z
+
+                                        ; Y-rotation
+                                        ; X :=  cos(vy) * xc + sin(vy) * zc
+                                        ; Z := -sin(vy) * xc + cos(vy) * zc
+           mov si,cs:vy
+           shl si,1                     ; si = angle y
+           mov ax,cs:cosinus[si]        ; ax = cosinus(angle y)
+           imul bx                      ; ax = cos(angle y) * x
+           mov di,ax
+           mov ax,cs:sinus[si]          ; ax = sin(angle y)
+           imul bp                      ; ax = sin(angle y) * z
+           add di,ax                    ; di = di+ax = cos(vy)*x + sin(vy)*z
+           sar di,8                     ; remove the (co)sin "256-factor"
+           mov es,di                    ; es = x-coordinate
+
+           mov ax,cs:sinus[si]          ; ax = sinus(angle y)
+           neg ax                       ; ax = -sinus(angle y)
+           imul bx                      ; ax = -sin(angle y) * x
+           mov di,ax
+           mov ax,cs:cosinus[si]        ; ax = cosinus(angle y)
+           imul bp                      ; ax = cos(angle y) * z
+           add di,ax                    ; di = di-ax = sin(vy)*x - cos(vy)*z
+           sar di,8                     ; remove the (co)sin "256-factor"
+
+           mov bx,es                    ; update x
+           mov bp,di                    ; update z
+
+                                        ; Z-rotation
+                                        ; X := cos(vz) * xc - sin(vz) * yc
+                                        ; Y := sin(vz) * xc + cos(vz) * yc
+           mov si,cs:vz
+           shl si,1                     ; si = angle z
+           mov ax,cs:cosinus[si]        ; ax = cosinus(angle z)
+           imul bx                      ; ax = cos(angle z) * x
+           mov di,ax
+           mov ax,cs:sinus[si]          ; ax = sinus(angle z)
+           imul cx                      ; ax = sin(angle z) * y
+           sub di,ax                    ; di = di-ax = cos(vz)*x - sin(vz)*y
+           sar di,8                     ; remove the (co)sin "256-factor"
+           mov es,di                    ; es = x-coordinate
+
+           mov ax,cs:sinus[si]          ; ax = sinus(angle z)
+           imul bx                      ; ax = sin(angle z) * x
+           mov di,ax
+           mov ax,cs:cosinus[si]        ; ax = cosinus(angle z)
+           imul cx                      ; ax = cos(angle z) * y
+           add di,ax                    ; di = di+ax = sin(vz)*x+cos(vz)*y
+           sar di,8                     ; remove the (co)sin "256-factor"
+
+           mov bx,es                    ; update x
+           mov cx,di                    ; update y
+
+           ret
+rotate     endp

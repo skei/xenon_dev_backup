@@ -1,0 +1,123 @@
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Rutiner
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+- 3D object Morphing... Start og slutt (X,Y,Z), deretter morphe mellom
+  disse p† n steps. Tabell med ADDERE initieres ved demo-start.. SQRT
+  tabell defineres p† forh†nd, for normaler... X/Y/Z -> X/Y.. Hvis
+  lengden skal v‘re mellom 0 og 127.
+  he: Vertex normaler morphes ogs†!
+- Animerte 3D objekter... Ha flere † cycle mellom... Eller 2 stk i EXE
+  fila, som det morphes mellom i oppstart av demo, og cycle mellom
+  alle steps...
+
+- 3D objekt faller ned p† et eller annet p† skjermen (logoting), logo
+  faller ned (evt. med flash og "smashed" bitmap), mens 3D objektet
+  spretter opp og roer seg midt p† skjermen - snurrer FORT... <->
+
+- 2 Objekter med samme X,Y,Z sentrum, roterer forskjellig vei -
+  Z-buffer, skaleres forskjellig opp og ned
+- SpaceCut objekter... Skaleres opp og ned, begge objekter, s† de p†
+  en m†te g†r inn og ut av hverandre. Gj›res enklest ved †
+  multiplisere hver koordinat med en verdi, enten f›r sortering, eller
+  tegning eller noe slikt...
+
+- 5 objekter X E N O N roteres individuelt - ZBuffer for SpaceCut
+  (bruk 5 nederste bits av pixelen, s† kan de ha forskjellig
+  farge/texture)
+- 4 smell... X E N   N flashes inn...
+  neste smell: BumpMap kule eller torus der O'en skulle v‘rt...
+  Roterer... Kanskje moving lightsource
+
+- 3D objekt snurrer... Et bitmap kopieres inn til bakgrunns-bufferet,
+  ‚n linje pr retrace... Bufferet kopieres til vanlig buffer hver
+  runde, for: Sletting av buffer og innlegging av bakgrunn bak objekt
+
+- Vertikal GFX (venstre eller h›yre side) spretter inn, treffer kant,
+  og spretter igjen (og roer seg etterhvert), i takt med musikk..
+
+- Tunell med Z-buffer (= Ypos bufferet muligens litt modifisert)
+
+- Plasma: 2 lag, ett for X og ett for Y - noe al  EnvMap plasma? ;)
+
+- Begynnelse: Bitmap zoomes sakte mot skjerm. Motion Blur...
+  Bl†-aktig. Smell/musikk - Flashes inn - no blur
+- Zoom/Smooth... Tabell al  tunell, men, inneholder offset til pixel
+  (p† skjerm) som skal hentes "hit"... Deretter, etter henting,
+  smooth...
+
+- 3D objekt - bakgrunn = rotozoom, min/max 1 blide p† skjermen
+  samtidig (Show/M12) - med motion blur p† blidet - eller "OrangeBlur"
+  - Skifter senere (flash) til tunell m/blur - skifter raskt -
+  musikk-takt-techno..
+  Objektet motion-blur'ed
+
+- Vertical waves... SInus-linjer - resultat av flere sinus-b›lger (som
+  i mange BBS introer)... Delay-fade (delay plot), motion-blur'es
+
+- Logo spretter ned, vertikale separate linjer, hver linje
+  forskjellige aksellerasjons-fart... Spretter litt opp igjen, og roer
+  seg til slutt p† plass...
+- Skjerm med ny effekt _spretter_ ned.. Bounce
+- Poly tunell.... f.eks 6 points som danner "sirkel".. Texture mappes,
+  zoomes FORT mot skjerm, og vrir seg....
+- Rotozoom inn og ut FORT. "treffer" skjermen akkurat ved dukn/flash..
+- Logo zoomes inn fra foran og "inn i" skjerm...
+- Kule... Annenhver poly i firkant (som 3DS lager som oftest) er
+  borte.. Motion-blur'es, ser baksiden av polys med annen
+  farge/texture
+- Zooming/panning pic. i bakgrunnen til effekt
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Andre ideer † sjekke ut:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş Splines - Spline polygons... 6 coords istdf. 3
+
+
+  1             B-Spline 1 = 1-a-2
+     a                   2 = 2-b-3
+ c                       3 = 3-c-1
+        2
+3   b
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş Pre-kalkulerte Morph-koordinater for morphing mellom 2 eller flere
+  objekter... Enten prekalkuler i Init, eller include i EXE..
+
+ş 3D rutina - istedenfor polygon coordinate # list - kanskje Vertex
+  list (Slope list)... Dermed slipper vi unna med 1/2 s† mange IDIV's
+  Eller Edge Table list... Alle edge slopes kalkuleres...
+  Hver edge brukes 2 ganger, dermed halveres antall slope
+  kalkuleringer...
+
+ş 3D landskap al  Terminal Velocity / Magic Carpet
+ş 3D landskap al  Comanche/Mars (med texture)
+
+ş Wobbling FixedPoint
+
+ş a       1
+  -   =   - * a   .... 1/b tabell...
+  B       b
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Div
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Using A.Rend. - (C)Axon 1995 ;)
+
+Greetings
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Personal greetings:
+- Adam Seychell (DOS32 + masse info)
+- Tobias Gloth - xToto/Valhalla (modified Cascada player)
+- Alexander Boczar - (beta versions of Noice Music System)
+- Gloom (for Sample CD, eller hva, Michal?)
+- Calvin (Watcom C)
+
+Group Greetings:
+Noice, Sorrox, Proxima, Inf, Spin, Index, SubLogic
+
+Tools used:
+
+- Alab v2.0 pre 3
+- Tasm v3.1, Tlink v3.01
+- Watcom C/C++ v1.0, Wlink v10.0
+- Cubic XM player source (party version)
+  Midas SOund System 0.5 (release version)

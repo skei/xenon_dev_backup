@@ -1,0 +1,66 @@
+Active Edge Table
+
+1. Create an ET (Edge Table) for all non-horizontal edges of all polygons
+   to render.... Use an array of lists, arraysize = num_scanlines on
+   screen... The edge's lowest Y-coordinate = where the edge is inserted
+   Sort within buckets(array) by X
+   Each entry contains:
+
+   - the X of the end with the smaller Y
+   - the Y of the edge's other end
+   - the X increment, used in stepping from one scanline to the next
+   - Poly ptr or something
+
+2. PT (Polygon table)
+
+   - contains InOut lag, initialized to false
+
+
+
+AddPolygon
+
+ - g† gjennom alle Edges i polygon
+ - for hver Edge, finn top Y... Sett inn Edge i EdgeTable (ET), i
+   array-pos = Y...
+
+Rendering:
+
+ - for Y=top to bottom (satt opp i AddPolygon)
+ - sort‚r edges etter X i EdgeTable[Y]...
+ - begynn med 1ste Edge... Hvis Edge's Polygon har flag = In
+
+
+
+
+
+A          x
+          xx
+B        x  x
+        x   x
+       x   ............
+      x    .       ..
+C    1     2  3  .4
+    x      .   ..
+   xx   A  .B..x
+     xx    ..  x
+       xx       x
+         xx     x
+           xx    x
+             xx  x
+               xx x
+                 xx
+
+A : Bare 1 edge, s† bare 1 pixel
+B : sort‚r etter X, start med left, sett polygon A = in, tegn til neste
+    edge, sjekk om annet polygon blir In, nei,
+
+
+C : 1 : polygon A = In, tegn A fra 1 til 2
+    2 : polygon B = In, mer enn 1 polygon = In... Sjekk hvilke som er
+        "topmost" = B.. tegn B fra 2 til 3
+    3 : Polygon A = Out. Dermed bare B som er In.. B fra 3 til 4
+    4 : Polygon B = Out. Ingen er In.. Og ingen flere edges i AET. Ferdig
+
+Optimiseringer...
+
+

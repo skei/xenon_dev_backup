@@ -1,0 +1,16 @@
+
+TexturePoly
+  convex polys...
+  Calc constant gradients
+  Z-clipping
+  2D clipping
+  evt. full frustum clipping
+  uses DrawTexture
+TextureTriangle
+  Triangles only
+  Used by TexturePoly...
+  gradients calculated
+  entire poly within screen, no clipping necessary
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+

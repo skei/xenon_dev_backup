@@ -1,0 +1,684 @@
+Engine_Update
+
+1) g† gjennom alle noder/keyframere og lag matriser, posisjoner, etc...
+
+2) alle noder - transform
+
+void Node_Transfom(sNode *N)
+{
+ if (N==NULL) return;
+ // make final Object -> World matrix here
+ // multiply with parent matrix (if not NULL)
+ Node_Transform(N->Child);
+ Node_Transform(N->Brother);
+}
+
+
+Rendering pipeline:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+- Setup camera matrix
+- Setup view frustum planes
+- all objects: calc matrices, inheritance, save Object->World, multiply
+  with camera matrix, save Object->Camera)
+- all objects:
+  - check if object active
+  - transform bounding sphere center, check if object visible
+    mark object: INSIDE, OUTSIDE, or CLIP
+    skip object if OUTSIDE
+  all vertices:
+  - transform vertices (Object->Camera)
+  - Project coordinates (3D->2D)
+  all polys in object:
+  - check and mark poly for z-clipping if any vertices crossed viewplane
+  - Backface culling
+  - Calc Z for sorting
+  - insert in global render-list
+- Sort global render-list
+- Draw all polys in global render-list
+  if object INSIDE - no need for clip-testing polys.. all polys are inside
+  view frustim, and visible on screen.
+
+-----------------------------------------------------------------------------
+
+ 1. Setup camera matrix
+ 2. Setup view frustum planes
+ 3. Calc Light->World matrix for all lights
+ 4. For all objects:
+ 4.1 Calc Object->World matrix
+ 4.2 Check Bounding Sphere - frustum... (distance point/plane). Use 1 bit in a
+     flag for each frustm plane it intersects.
+ 4.3 If Bounding sphere is NOT totally outside frustum
+ 4.3.1 Clear all clipping and visible flags in object/vertices/faces/whatever
+ 4.3.2 Inverse transform Camera to Object Space (inverse Object->Camera matrix)
+ 4.3.3 For all polys in object:
+ 4.3.3.1 Check dot-prod plane/camera vector
+ 4.3.3.2 If visible (poly points towards camera)
+ 4.3.3.2.1 Project the poly's vertices to view/camera space (if not already
+           projected, mark them as we go with a flag or something - clear them
+           all before rendering, or..???) Also use the parent and camera
+           matrix...
+ 4.3.3.2.2 if clipping needed (4.2): If all Z's is behind near or far z-plane,
+           skip poly. If some, mark poly: Z-clip needed
+ 4.3.3.2.3 project vertices to 2d.
+ 4.3.3.2.4 Check if 2d poly is totally outside 2d screen boundaries, and if so,
+           skip poly. if some outside, mark which sides needs to be clipped
+ 4.3.3.2.5 for all lights in scene:
+ 4.3.3.2.5.1 Inverse transform light to object space
+ 4.3.3.2.5.2 Calc vertex light intensity... And eventual face light if
+             flat-shading
+ 4.3.3.2.5.4 Eventual Fog/Haze vertex calculations
+ 4.3.3.2.5.3 Insert poly in RenderList
+ 5. Clear buffer
+ 6. For all polys in Renderlist
+ 6.1 Calc things like constant gradients for texture mapping, etc (or: does it
+     work if the poly is not a triangle?)
+ 6.2 Check Z-plane clipping flag (from 4.3.3.2.2). Clip if necessary.  May
+     result in poly with more than 3 vertices
+ 6.3 Project all vertices in poly to 2d.
+ 6.4 2d clipping. Check which planes the bounding sphere intersects, and only
+     clip against these sides.
+ 6.5 Triangularize poly (vertex 1-2-3, 1-3-4, 1-4-5, etc), and draw each poly as
+     you create them
+ 7. Wait for retrace
+ 8. Copy buffer to visible screen
+
+
+-----------------------------------------------------------------------------
+
+Ideas:
+
+þ Shared Edges
+þ Falloff i lights & distance light falloff... Hvordan lys-styrken avtar
+  med distanse...
+
+-----------------------------------------------------------------------------
+
+ #pragma aux _CHP "_*";
+_CHP()
+ {
+ }
+
+Simply link this file in with the rest of your program, and don't put it
+in a header.  This new __CHP routine will overide the system routine.  If
+you compile with the -ox option, the new __CHP routine will only consist
+of a "ret" instruction.
+
+it is no longer C conformant.
+(int)7.5       =       8       should be       7
+(int)7.6       =       8       should be       7
+(int)8.5       =       8       should be       8
+(int)8.6       =       9       should be       8
+
+-----------------------------------------------------------------------------
+
+The way you do it is ACTUALLY WITHOUT a direction check...
+
+You do it with the Eye LOCATION...  and because you do the calculations in
+object space, it works regardless of perspective.
+
+First of all, you have the equation of a plane...
+
+Ax + By + Cz - D = 0...       (A,B,C) are the coords of the vertex.
+D is some constant
+(x,y,z) is the vertex normal.
+This converts to      Ax + By + Cz = D
+
+What you do is pre-calculate the normals and a D for each Vertex/Poly
+Then, for every ENTIRE OBJECT, you back-transform the Eye Location.  This
+means you wanna rotate and transpose the Eye Location in the reverse
+direction and in reverse order.  Then you plug the back-transformed eye
+into the plane equation like so...     Eyex*Norx + Eyey*Nory + Eyez*Norz =
+Something If that Something is less than the D you've pre-calculated for
+the Poly, then the face is NOT visible.
+
+This is the single best method for Backface Culling currently in
+existence...
+
+-  You don't transform the invisible vertices.
+-  You don't transform the normal vectors.
+-  You're transforming only ONE thing per object per frame.
+-  You calculate as little as possible.
+-  The results are ABSOLUTELY ERROR-FREE!  (Assuming proper
+   implementation).
+
+-----------------------------------------------------------------------------
+
+Does anybody know how to translate the focal length of a lense to the
+resulting field of view. I need this to translate 3DS camera parameters to
+something that my renderer can make sense of
+
+Use the formula:
+  w/(2f) = tan(t/2)
+where
+  w is the dimension of the image,
+  f is the focal length
+  t is the angle
+For 35mm film, the frame is about 24mm x 36mm, so if you're lookig for a
+field of view in the long dimension for a 50mm lens, you have:
+t = 2 * atan( 36/(2*50) ) ~ 40 degrees
+
+-----------------------------------------------------------------------------
+
+Then you just do dot products to get the color....  that's 3 muls a normal
+rather than 12...  You can use the same trick for backface cullling...
+
+Just note that when you back-transform, you rotate by the opposites of the
+angles and in the reverse order as well.
+
+Yep, and only those vertices that are connected to visible polygons need
+to be transformed and lighted, so. a very nice speedup - no rotating
+normals at all, no vertex or surface normals, and transforming ~50% of
+vertices than usually and lighting ~50% of vertices.  Seems a pretty good
+deal to me..
+
+Camera and light can be transformed from world to object space just
+transposting the upper 3x3 matrix and negating the translation part.
+Actually this can be done more nicely staright to the code that does the
+transformation so no memory moving needed.
+
+-----------------------------------------------------------------------------
+
+Polygon Rendering
+-----------------
+
+This algorithm is used to scan-convert a polygon defined by an ordered set
+of verticies. The fill algorithm is implicitly odd-even.
+
+Glossary
+
+ET
+Edge table; a list of edges, sorted by their minimum y value, Ymin
+
+AET
+Active Edge Table; a list of the edges needed to render the current span.
+The Y value for the current span is Ycur.
+
+Edge
+A structure derived from the polygon vertex list, in a form convenient for
+rendering. It contains the Minimimum Y value Ymin, the X value associated
+with the minimum Y vertex, Xmin, The inverse slope of the edge, from lower
+vertex to higher vertex 1/m, and the difference in Y values, dY, which use
+used to determine how long the span should be used while rendering.
+
+Rounding Rules
+A set of rules applied the the floating point X values to determine the
+endpoints of the pixels spans owned only by this Polygon and none of it's
+adjacent neighbors.  Fractional X values are rounded up on the left edges,
+rounded down on the right edges.  Integer X values are left alone on the
+left edges, decremented on the right edges. Left edges and right edges
+alternate, so the left edges are odd, and the right edges are even
+(counting X's starting with 1).
+
+Span
+A horizontal row of pixels at a particular Y value in the frame buffer.
+
+Interior Rules
+An interior rule gives you a way of determining if a particular region in
+a polygon is inside or outside. We cover two major rules, the odd-even and
+the non-zero winding rules.  In both rules, you pick a point in the region
+of interest (the part of the polygon you're trying to decide about; inside
+or outside?) then draw a line from that point to a spot outside the
+polygon.
+
+If you're using the odd-even rule, you count the number of interections of
+your line with polygon edges; odd number, you were inside; even, the
+region is outside.
+
+This rule is fast, and is what most polygon fill algorithms use. It
+doesn't handle all cases (such as the interior of a star-shaped polygon.
+If you need a better algorithm, that's almost as fast, consider the
+non-zero winding rule.
+
+For this rule, you have to assign a direction to each polygon edge. As you
+step through the verticies of a polygon, you can give each edge a
+direction; ie. from Vi-1 to Vi. Taken as a whole, the direction of each
+edge is either more clockwise around the center of the polygon, or more
+counter-clockwise.
+
+To use the non-zero winding rule:  Pick an polygon edge direction, either
+clockwise or counter clockwise, and call that positive. Call the other
+direction negative.
+
+Now you draw a line from the region of interest in the polygon to outside
+as before. With the non-zero winding rule, you start with a count of 0:
+add 1 if you cross a postive edge (as defined above), and subtract 1 if
+you cross a negative edge. If the count at the end is 0, you were outsize.
+If it was non-zero, it was inside.
+
+Algorithm
+
+* Ycur = smallest y in ET
+* AET empty
+* remove horizontal edges from ET (or don't put them in in the first  place).
+* Loop(until ET and AET are empty)
+
+    Add new Active Edges
+    1. move edges with Ymin = Ycur from ET to AET
+    2. sort edges in AET by Xmin (this is usually combined with previous
+       step by using an insertion sort) Remove expired Active Edges
+    3. remove edges with dY = 0 from AET Draw Active Edges
+    4. round Xmin values using rounding rules, combine with Ymin to make
+       endpoints
+    5. draw spans between pairs of endpoints.
+       Update Active Edges
+    6. increment Ycur
+    7. decrement dY in each edge in AET
+    8. update Xmin (Xmin += 1/m) in each edge in AET
+
+Example
+
+Given a polygon with the following verticies: A(1,0) B(4,2), C(1,5):
+
+Edge Table
+ Edge NameYmin Xmin dY 1/m
+   AB      0    1  2  3/2
+   BC      2    4  3  -1
+   CA      0    1  5   0
+
+Trace of Active Edge Table (contents of AET at rendering step) Results of
+first step depend on rounding rules for both X's on the same integer value
+(I vote for nothing drawn).
+
+ Ycur Edges    X's   Endpoints (rounded X's)
+  0  AB, CA   1, 1   None (or (1,0)->(1,0))
+  1  CA, AB 1, 2-1/2      (1,1)->(2,1)
+  2  CA, BC   1, 4        (1,2)->(3,2)
+  3  CA, BC   1, 3        (1,3)->(2,3)
+  4  CA, BC   1, 2        (1,4)->(1,4)
+
+-----------------------------------------------------------------------------
+
+void Build_Camera_Matrix()
+{
+ Vector Up, N, U, V;
+
+ Up.x = sin(Camera.Roll);
+ Up.y = 0;
+ Up.z = -cos(Camera.Roll);
+ N.x = Camera.Tx-Camera.Sx; // Target-Source
+ N.y = Camera.Ty-Camera.Sy;
+ N.z = Camera.Tz-Camera.Sz;
+ Normalize(&N);
+ Cross(&N,&Up,&U);
+ Normalize(&U);
+ Cross(&U,&N,&V);
+ Normalize(&V);
+ BuildMatrix(&cmatrix,-U,V,N);
+}
+
+-----------------------------------------------------------------------------
+
+Here's some formulas:
+t = (zmin - z1) / (z2 - z1)
+ClippedX = (x2 - x1) * t + x1
+ClippedY = (y2 - y1) * t + y1
+x1,y1,z1 and x2,y2,z2 are the endpoints of the line.
+I've haven't used these formulas personally, so I don't how well they
+work.
+
+I wrote:
+z - z1
+------    = clip_ratio
+z2 - z1
+
+You can then just multiply
+nx = ((x2 - x1) * clip_ratio) + x1
+ny = ((y2 - y1) * clip_ratio) + y1
+nz = z
+Wow, I actually got my formulae right!
+
+-----------------------------------------------------------------------------
+
+(sprites)
+
+Does anyone know where I can get hold of a matrix which can rotate any
+given plane so that it becomes parallel to another given plane?
+More specifically:
+I have two planes (surfaces), P1 and P2.
+Plane P1 is defined by the three points P1A, P1B, P1C.
+Plane P2 is defined by the three points P2A, P2B, P2C.
+Point P1A has coordinates P1Ax, P1Ay, P1Az.  You get the idea for the
+other coordinates...
+I need a 3 x 3 matrix which will rotate P1 so that it becomes parallel to
+P2.
+
+Well if you take the normal vector of each plane, Normal_P1 and Normal_P2
+and calculate the DotProduct, you can then calculate the angle between
+them, you can rotate the points of P1 with use of a quaternion-Matrix.
+The quaternion vector will be the NormalVector of the plane defined by
+Normal_P1 and Normal_P2 and the angle will be the calculated one.
+
+-----------------------------------------------------------------------------
+
+Hi, I would like to know how the lense flares are done when you look into
+the sun, like in Turok and Privateer II.
+
+I'd bet that the flares in P2 are prerendered bitmaps that are blitted
+with tranparency.  Probably by way of a color blending lookup table.  P2
+uses alot of index color blending for some pretty nifty effects.  The
+flares look very nice and the algo the use to move them around relative
+>to the star works well,
+and would this algo be?? could you please tell us?
+
+The flare placement algorithm is really quite trivial.  The hard part
+is making the flares themselves look convincing.
+
+1) Choose a location for the flare in screen coordinates (xf, yf)
+2) Compute a vector from the flare point to the camera origin (i.e.
+   screen center): Vf = ((x0 - xf), (y0 - yf))
+3) Place the "main" flare (i.e. the largest flare bitmap) at the
+   flare point (xf, yf).
+4) For each additional flare, scale the position along the
+   vector  from the flare point to the camera origin:
+   sub_flare[n] = flare_pos + (vector * scale[n]);
+
+   You will need as many scale values as secondary flares.  You can choose
+   whatever scale values you think look good, but you will want some
+   greater than 1 and some less than 1.  I happen to use (0.4, 0.5, 1.1,
+   1.2, 1.4), but I just pulled those numbers out of thin air.  You might
+   also want to use a negative scale value to place a small flare on the
+   "outside" of the main flare.
+
+-----------------------------------------------------------------------------
+
+Give two 3D points A and B, and given the clipping plane equation (Z=n)
+where n is usualy close to but not equal to zero, here's how you clip line
+AB...
+
+t = (n - A.z) / (B.z - A.z);
+A.x = A.x + t * (B.x - A.x);
+A.y = A.y + t * (B.y - A.y);
+A.z = n;
+
+Please note, this code assumes that "A" is the point behind the camera.
+If "B" is the point behind the camera, just swap the variables.
+
+-----------------------------------------------------------------------------
+
+Im looking for a text about a fast polygon sorting method, as it is now i
+am only useing the slow bubble sorting
+
+The way I have always done this is to use a linked list that is built in
+sorted order.  When you have a new polygon to add to the list you simply
+search through the list to find the appropriate point to insert the new
+polygon.  When you have finished building your polygon list it is already
+sorted.  The fastes implementation is to use a doubly linked list so you
+can search backwards and forwards in the list.  The benefit of this is
+since you will usualy be inserting groups of triangles with a simmiler Z
+value (all the triangles in one localised object for example).  I used
+this sorting system on swiv 3d,  the average number of steps i needed to
+check in order to find the correct position was about 6, far faster then
+using a post sorting method.
+
+-----------------------------------------------------------------------------
+
+What does "outcode-type testing" mean?
+
+It is a method for quickly ("trivially") rejecting or accepting a complete
+geometry set (be it line, polygon, mesh, whatever).
+An outcode is basically a bit field. For any CONVEX view frustum (not
+necessarily a 90-degree quad), you can test every vertex in your geometry
+against all frustum edges. If the vertex is "out" of view on a given edge,
+assign a 1 to this edge's bit in the outcode value (each edge has a fixed
+bit number for it: side 0 uses bit 0 , etc).
+Once you have all outcodes for all vertices, AND them: if the result is
+nonzero, then all your geometry is out of the frustum. This is because
+whatever outcode bit remains set in the AND means all vertices are out of
+that edge (all had bit set to 1 => AND operation yields 1).  If the result
+is 0 then you may need some clipping.
+You can also OR all outcodes too, and if this result is 0 then you will
+need not bother with any further clipping because no vertices will be out
+of the frustum => all your geometry is completely inside it.
+If none of the tests say anything conclusive, then you probably have to
+actually perform individual clipping of your primitives.
+
+-----------------------------------------------------------------------------
+
+1. Planar: the texture is sitting on a plane of any orientation at some
+position. Transform the object to the plane's space, where the plane is
+lying of the xy plane. Then, the texel coordinates at any vertex are:
+u = x * texturewidth / planewidth
+v = y * textureheight / planeheight
+
+2. Cylindrical: the texture is applied as if it were wrapped around a
+cylinder, and "shrink wrapped" around the object. The cylinder can be
+anywhere in space and have any orientation. Basically, what you do is
+transform the object to the cylinder's space, where the y axis is the axis
+of the cylinder. Then, the texel coordinates at any vertex are given by:
+u = atan2(z, x) * texturewidth / (2*PI)
+v = y * textureheight / cylinderheight
+
+3. Spherical: the texture is wrapped around a virtual sphere, and shrink
+wrapped onto the object. Transform the object to the sphere's space, where
+the origin is the sphere's center, blah blah blah:
+u = atan2(z, x) * texturewidth / (2*PI)
+theta = acos(sqrt(x*x + z*z)/sqrt(x*x + y*y + z*z))
+if ( y < 0 ) theta = -theta
+v = textureheight/2 + theta*textureheight/PI
+Whoops, here's a better way:
+v = textureheight/2 + asin(y/sqrt(x*x + y*y + z*z)) * textureheight / PI
+Sorry, I wasn't thinking clearly earlier.
+
+-----------------------------------------------------------------------------
+
+(Raytracing)
+
+One possibility is to project the 3D-Object to the 2D-Screen BEFORE
+calculating the rays. For this, you will have to use a z-buffer. For
+example, if your scene consists only of polygons, project all polygons to
+the 2D-Screen. For every point in every Polygon, you now have to calculate
+the ray-polygon cutpoint. Using a z-buffer you can ensure that only the
+first cuts are shown on the screen.  The advantage of this method is that
+you know at where you get a cutpoint and where not, which means that you
+won't have to calculate only a single ray in vain (a ray which does not
+cut any object).
+
+---
+
+Spheres look like circles, so calculate the radius and X,Y coords in
+screen space, then do a filled circle
+I need the "Z's" of the sphere for Z-Buffering Intersections and a
+proprietory texturing algorithm.
+To put it very very short (I'm in a hurry!):
+Z=+-sqrt(R^2+X^2+Y^2)
+
+-----------------------------------------------------------------------------
+
+1) Is it true that I have to calculate the planes of my frustum to clip
+against (assuming Cohen-Sutherland)? Although I don't have it on hand, I
+once saw code that use the tangents of the viewing angle to figure the
+sides of the frustum ( I believe it was ZSort by M. Abrash, although I
+realize he was clipping in worldspace)
+
+The 6 clipping planes would be (in viewspace):
+
+(0,-1,-tan(Alpha)),0    Top Clipping Plane
+(-1,0,-tan(Beta)),0     Right Clipping Plane
+(0,-1,tan(Alpha)),0     Bottom Clipping Plane
+(-1,0,tan(Beta)),0      Left Clipping Plane
+(0,0,1),Zf              Front Clipping Plane
+(0,0,1),Zr              Rear Clipping Plane
+
+These describe the normal to the plane and the plane scalar 'k'.  Zf and
+Zr are the Hither and Yon plane Z coordinates, respectively.
+
+> 2) Do I calculate these planes in viewspace or a normalized space?
+
+In viewspace.
+
+-----------------------------------------------------------------------------
+
+I'm not quite sure you got the principle. Let me do some ASCII art,
+too (I do it for fixed width font)
+
+   _____
+  /     \          This is the polygonal approximation of a cylinder.
+ /       \         (triangulation edges don't matter herein)
+|\   A   /|        How to make this cylinder look round with Phong or
+| \ ___./ |        Gouraud shading?
+|B |   | D|
+ \ | C | /         (Lets call face A's normal NA, B's NB etc.)
+  \|___|/
+
+To shade one face you have to determine vertex normals for it's vertices.
+Lets begin shading face C, for example.
+
+To get the vertex normal for the upper right vertex of C (the one vertex
+marked as dot) you have to take the average of NC and ND. How do you know
+not to take the average of NA, NC and ND?
+
+Here the smoothing groups come into play.  C and D should share some
+smoothing group indicating their normals should be averaged. C and A
+shouldn't. So assign face A to have only smoothing group one (set the
+first bit in it's smoothing parameter (SA := 0001b)). Assign B, C, and D
+to share smoothing group 2 (set second bit but not first in all of the
+smoothing parameters (SB := SC := SD := 0010b)).
+
+So to get the vertex normal at vertex V of a face (C) take the average of
+it's face normal (NC) with all faces that:
+
+- also share V (these are faces A and D)
+- and share some smoothing group with the face (A doesn't because SC & SA
+  = 0001b & 0010b is 0000b) (D does    because SC & SD = 0001b & 0001b is
+  0001b)
+
+In 3D-Studio you actually have 32 bits for up to 32 smoothing groups. This
+approach is much more powerful than the usual way by taking the angle of
+adjacent faces to decide wether they are to be smoothed or not. You can
+see this by a cube that may be made looking like a cube, a cylinder or a
+sphere by just assigning different smoothing groups to it's faces.
+
+-----------------------------------------------------------------------------
+
+(fog)
+
+One can also calculate the z distances at the vertices and interpolate
+(normal gouraud shading) between them. This would allow quick checking of
+the distances (i.e. are we inside the fog clipping front and back planes)
+and possibly substitute a cheaper rendering function (without fogging) if
+polygon will not be fogged at all. Also, completely fogged polygons could
+be discarded.
+The formula to calculate the final pixel colour is as follows:
+f = fogging value ranging from 0..1 (0 = non-fogged, 1 = fully fogged)
+r,g,b = pixel colour (after texturing and shading)
+fr,fg,fb = fog colour in RGB
+r' = r*(1.0-f) + fr*f;
+g' = g*(1.0-f) + fg*f;
+b' = b*(1.0-f) + fb*f;
+These values can be pre-calculated for a set amount of fogging depths (say
+32 or 64) and stored into a look-up table, thus reducing the operation to:
+lut = foglut + (int)(f * 32)<<8;
+r' = lut[r];
+g' = lut[g];
+b' = lut[b];
+In an 8-bit renderer (indexed colour), the lut used would be pre-quantized
+and thus the operation reduces to:
+p = pixel to fog (8-bit representation)
+p' = foglut[(int)(f*32)<<8 + p];
+if the fogging values are originally stored as integers (or fixed point)
+we don't of course have to do the boring floating point -> integer
+conversions.
+
+-----------------------------------------------------------------------------
+
+Cameleon wrote:
+>
+> Hello!
+>
+> I am begining to program 3D and i need a formula to convert
+> 3D coordinats to a 2D screen. XYZ to XY. Please help me!
+> Since I don't look in News Groups to often I would appreciate
+> an Email to me.
+
+Ok, I'm doing this in floating point, using C, since you did not specify
+how you wanted it.  It's not optimized in any way. It's just for
+explaining.
+
+///// Begin code /////
+
+#include <math.h>
+
+// The screen dimensions
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 200
+
+// The aspect ratio of the screen
+// (value of 2.0 makes everything look twice as high)
+#define ASPECT_RATIO 1.0
+
+// Angle of the camera lense
+#define FIELD_OF_VISION 45.0
+
+/// The rest is all code and calculations ///
+
+// Conversion from degrees to radians
+#define PI 3.14159265
+#define DEG2RAD( deg ) ( (deg) * PI / 180.0 )
+
+// Calculate focal distance from field of vision
+#define FOV2FOC( with, angle ) \
+  (((width)*cos((angle)/2.0))/(sin((angle)/2.0)*2))
+
+// Global variables
+double FocalDistaceX = FOV2FOC( SCREEN_WIDTH,DEG2RAD(FIELD_OF_VISION));
+double FocalDistaneY = FOV2FOC( SCREEN_WIDTH,DEG2RAD(FIELD_OF_VISION))*ASPECT_RATIO;
+double ScreenCenterX = SCREEN_WIDTH/2;
+double ScreenCenterY = SCREEN_HEIGHT/2;
+
+// Some structures
+struct xyz_t { double x,y,z; };
+struct xy_t { double x,y; };
+
+// This function calculates the perspective.
+// (Converts 3d to 2d)
+// You might want to do this in an inner loop, using assembly. And also
+// you might want to do it using integer.
+
+struct xy_t PerspectiveCalculate( struct xyz_t *p )
+{
+ struct xy_t r;
+
+ r.x = (p->x * FocalDistanceX / p->z) + ScreenCenterX;
+ r.y = (p->y * FocalDistanceY / p->z) + ScreenCenterY;
+ return r;
+}
+
+-----------------------------------------------------------------------------
+
+Given 3 points P1,P2,P3 then let
+
+
+x1 = P1x - P2x
+x2 = P3x - P2x
+y1 = P1y - P2y
+y2 = P3y - P2y
+z1 = P1z - P2z
+z2 = P3z - P2z
+
+Then you calculate:
+Lenght = sqrt(sqr(y1*z2 - y2*z1)+sqr(z1*x2 - z2*x1)+sqr(x1*y2 - x2*y1))
+PlaneA = (y1*z2 - y2*z1)/Length
+PlaneB = (z1*x2 - z2*x1)/Length
+PlaneC = (x1*y2 - x2*y1)/Length
+PlaneD = - (PlaneA*P2x + PlaneB*P2y + PlaneC*P2z)
+
+-----------------------------------------------------------------------------
+
+Also, you may want to put some distance factor into the equation.
+Otherwise, if two polygons face the light at the same angle, but one
+polygon is a lot further away, it will still be shaded the same brightness
+if you do not account for distance. Distance is not that hard to do in a
+simple way.  Just have each light a maximum distance that it illuminates
+say 512, then subtract the distance from this value.  So if the poylgon is
+256 from the light, it will be 512-256=256  .. shaded at half brightness.
+512-500=12 means it is shaded in 12/512 = 3/128 th's brightness (pretty
+dark).
+
+-----------------------------------------------------------------------------
+
+float FindSidePointLine(sPoint2D *p, sLine2D *l)
+{
+ return    ( l->y1 - p->y ) * ( l->x2 - l->x1 )
+         - ( l->x1 - p->x ) * ( l->y2 - l->y1 );
+}

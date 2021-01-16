@@ -1,0 +1,119 @@
+GFXLAB v0.2à
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Writing dox is boring, so... short version...
+
+
+
+Bring up the main menu by pressing the right button.
+
+Load
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Loads GIF, PCX, BMP, RAW files... SOme of the loaders are SLOW at the
+moment. Will speed'em'up quite a lot (ASM conversion) until next
+version..
+This should be quite easy to use... The Ch.DIR (Change Dir) button
+does a physical DOS CD command, changing drive, so that next time you
+bring up the load menu, it returns to where you left...
+
+Save
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Same as Load, but saves only PCX and RAW at the moment, and pretty
+slow too, but, but... Extension decides which format to save. .PCX
+saves PCX, everything else = RAW
+
+About
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+You probably understand what this one does... :)
+
+Quit
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Quits to DOS
+
+Grab
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Sprite/Font grab... Select size of bitmap to grab, and the filename
+(in the current dir)..
+The file will be created (or overwritten if it already exists)..
+Press left button when "cursor" is where you want to save, continue
+until all fonts/bitmaps are saved, then right button to quit..
+
+Clip
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Select a rectangular area to save as RAW. Left button to select upper
+left corner, left again to save selected area...
+
+Palette
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Not implemented yet... Wait for this.. This will include all the
+traditional palette editing functions, as well as a few others, never
+seen before!
+
+Tools
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Same here...
+
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Well, well, as this is just an alpha release, a lot of stuff is either
+not implemented, or not finished/optimized...
+Quite a lot will be added the next weeks......
+
+Send me your suggestions and ideas!!!!!!
+
+Well, if there's anything, like comments, suggestions, bugs, etc,
+contact me at:
+
+email   tskei@sn.no
+
+Snail   Tor-Helge Skei
+        Flat†stoppen 75
+        7079 Flat†sen
+
+Phone   +47 72 58 20 79 (no foreign callers, please!)
+
+BBS     +47 72 58 20 79 (23:00 - 07:00 Norwegian time). Sysop:Axon
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+"To-Do" list...
+
+ş Convert most of the graphics primitives to ASM. Most are now pure
+  pascal...
+ş Sort files in file-selector
+ş Speed up loading/saving
+ş Set border to another color when Grabbing
+ş Write a better DOC file :)
+ş Palette editor
+  I have som MAJOR ideas here... Expect to see something never seen
+  before...  and of course all those traditional palette editing
+  functions...
+ş A few image manipulation tools, like:
+  - Smooth
+  - Resize
+  - Flip/Mirror
+  - Rotate
+ş Save GIF (working on it)
+ş Speed up loading routines, especially PCX - convert to ASM
+ş Save (and Load?) DB format (goodbye, BIN2DB!)
+ş Some fine-tuning of the GUI. Speeding up a few parts.
+  Adding a few more "objects", moveable, resizeable windows, multiple
+  windows at once... -> Better GUI...
+ş Add some method of running external programs, with VGA-screen (or
+  some buffer) available/accessible, so that other persons can write
+  their own utils for GfxLab.
+  And a menu for these..
+ş Higher resolutions.. Thought about at least 640x480..
+ş Support for planar formats, tweaked and 4-plane modes, save planes
+  separated in RAW & DB..
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Revisions:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+v0.1á
+- First version. Not released. Interface sucked. Only loading &
+  saving, minor palette editor, font/sprite grabber..
+  Sources deleted!
+
+v0.2á
+- New GUI (some optimizations still needed)
+- Loads GIF, BMP, PCX & RAW
+- Saves PCX & RAW

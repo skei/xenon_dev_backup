@@ -1,0 +1,478 @@
+
+Here are the possible standard effects:
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+#	Effect name 						 Uses Arguments as
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+0	Arpeggio							 xxxx  yyyy
+1	Slide Up							 xxxxyyyy
+2	Slide Down							 xxxxyyyy
+3	Tone Portamento 					 xxxxyyyy
+4	Vibrato 							 xxxx  yyyy
+5	Tone Portamento + Volume Slide		 xxxx  yyyy
+6	Vibrato + Volume Slide				 xxxx  yyyy
+7	Tremolo 							 xxxx  yyyy
+8	NOT USED							 n/a
+9	Set SampleOffset					 xxxxyyyy
+A	VolumeSlide 						 xxxx  yyyy
+B	Position Jump						 xxxxyyyy
+C	Set Volume							 xxxxyyyy
+D	Pattern Break						 xxxxyyyy
+E	*Extended Effects					 see below
+F	Set Speed							 xxxxyyyy
+
+And here are the possible extended effects:
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+					#	Effect name
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+					E0	Set Filter
+					E1	FineSlide Up
+					E2	FineSlide Down
+					E3	Glissando Control
+					E4	Set Vibrato Waveform
+					E5	Set FineTune
+					E6	Set/Jump to Loop
+					E7	Set Tremolo Waveform
+					E8	NOT USED
+					E9	Retrig Note
+					EA	Fine VolumeSlide Up
+					EB	Fine VolumeSlide Down
+					EC	NoteCut
+					ED	NoteDelay
+					EE	PatternDelay
+					EF	Invert Loop
+
+A description of each  effect and how it  is implemented is given  on the
+following pages.  Once again, all values are given in  hexadecimal unless
+otherwise stated.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+0: Arpeggio
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+If a note as an effect number of 0, it is only an arpeggio if there is at
+least one non-zero argument.  When there is at least one  valid argument,
+this effect means to  play the note specified,	then the note+xxxx	half-
+steps, then the  note+yyyy half-steps,	and then return  to the  original
+note.  These changes are evenly spaced	within the time for a line	to be
+played at the current speed.
+
+This effect is usually	used to simulate chords  (where a major chord  is
+the note+4 half  steps and the	note+7 half-steps).   This does not  work
+very well on  most samples.   This can also  be used  to produce a	heavy
+vibrato.  Here is an example of this effect:
+
+Note C-3, xxxx=4, yyyy=7
+
+this will attempt to produce a C-major chord.  At the beginning of a line
+the C-3 note is played, then at 1/3 of the way through	the line the note
+is retriggered at E-3, 2/3 of  the way through it is retriggered  at G-3,
+and at the beginning of the  next line (if there  are no new notes	to be
+played on the channel), it is retriggered at C-3 again.
+
+This presents a minor problem for timing, since you have to keep track of
+the arpeggio during the course of playing  a line.	What you could	do is
+use a  timer differently,  or set  up  another timer  that	independently
+tracks the timing of the arpeggio.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+1: Slide up (Portamento Up)
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect will  slide up	the frequency  (decrease the  period) of  the
+sample being played on the channel by xxxxyyyy notes for every	tick that
+occurs during the line.   You usually cannot  slide past note B-3  unless
+you have implemented octave 4 (NON-STANDARD!).	The number of  ticks that
+occur per line is set with effect  $F, the set speed command.	Since the
+slide rate depends on  the speed, be careful  if you set are  composing a
+MOD when you change the speed.	An example of this effect is:
+
+Note C-3, xxxxyyyy = 2, playing at speed 3.
+
+At the beginning of the line the sample is started at period C-3.  At the
+first tick, the period is decremented by 2 (the frequency  is increased).
+At the	second tick,  the period  is  again decremented  by  2.   At  the
+beginning of the next line, if there is  not a new note to be  played the
+period is again decremented by 2.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+2: Slide down (Portamento Down)
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect will slide	down the frequency (increase  the period) of  the
+sample being played on the channel by xxxxyyyy tones for every	tick that
+occurs during the line.  You  usually cannot slide below note  C-1 unless
+you have implemented octave 0 (NON-STANDARD!).	The number of  ticks that
+occur per line is set with effect  $F, the set speed command.	Since the
+slide rate depends on  the speed, be careful  if you set are  composing a
+MOD when you change the speed.	An example of this effect is:
+
+Note C-3, xxxxyyyy = 2, playing at speed 3.
+
+At the beginning of the line the sample is started at period C-3.  At the
+first tick, the period is incremented by 2 (the frequency  is decreased).
+At the	second tick,  the period  is  again incremented  by  2.   At  the
+beginning of the next line, if there is  not a new note to be  played the
+period is again incremented by 2.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+3: Slide to note
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect will slide	a note being played  on a channel to  a specified
+note.  The parameter xxxxyyyy will states the speed at which a slide will
+occur.	For each tick that	occurs during the line, the  period currently
+being played is altered by the number of notes specified.  The	number of
+ticks that occur per line is  set with effect $F, the set  speed command.
+Since the slide  rate depends on  the speed,  be careful  if you set  are
+composing a MOD when you change the speed.	An example of this effect is:
+
+Slide to note C-2, xxxxyyyy = 2, playing at speed 3.
+
+At the beginning  of the  line the current	frequency for  the sample  is
+altered to	be 2  notes closer	to	C-2.   At the  first  tick, the  same
+alteration occurs, changing the period to form a note even closer to C-2.
+The same occurs for  each tick after that.	 This effect continues	until
+another effect is started or the specified frequency is reached.
+
+If a slide rate is not	specified (xxxxyyyy is zero) then the  last slide
+rate used on the channel is used again.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+4: Vibrato
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+Vibrato means to "oscillate the sample pitch using a  particular waveform
+with amplitude yyyy notes, such that (xxxx * speed)/64	full oscillations
+occur in the line".  The waveform to use in vibrating is set using effect
+E4 (see  below). By  placing vibrato  effects on  consecutive lines,  the
+vibrato effect can be sustained for  any length of time.  If  either xxxx
+or yyyy are 0,	then values from  the most recent  prior vibrato will  be
+used.
+
+An example is: Note C-3, with xxxx=8 and yyyy=1 when speed=6.	This will
+play tones	around	C-3,  vibrating through  D-3  and  B-2 to  C-3	again
+(amplitude - yyyy - is 1), with (8*6)/64 = 3/4 of a  full oscillation per
+line.  Please see effect E4 for the waveform to use for vibrating.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+5: Continue effect 3:'Slide to note', but also do Volume slide
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect will change the volume	of a channel while a  tone portamento
+(effect 3) is taking place.  The values xxxx or yyyy specify the speed of
+the volume change.	 If xxxx is nonzero  the volume is increased,  and if
+yyyy is nonzero the volume is decreased.  It is illegal for both xxxx and
+yyyy to be non-zero.  You cannot slide past 64 or below 0.
+
+As an example, take  the xxxx to  be set to  3.  This  means that at  the
+beginning of the line, the current volume of the channel is  increased by
+3.	The volume	is increased again for	every tick on  this line and  the
+lines following (until there  is a new effect).   Once again, the  volume
+cannot slide up past 64.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+6: Continue effect 4:'Vibrato', but also do Volume slide
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect will change the volume	of a channel while a  vibrato (effect
+4) is taking place.   The values xxxx  or yyyy specify	the speed of  the
+volume change.	If xxxx is	nonzero the volume is increased, and  if yyyy
+is nonzero the volume is decreased.  It is illegal for both xxxx and yyyy
+to be non-zero.  You cannot slide past 64 or below 0.
+
+As an example, take  the yyyy to  be set to  2.  This  means that at  the
+beginning of the line, the current volume of the channel is  decreased by
+2.	The volume	is decreased again for	every tick on  this line and  the
+lines following (until there  is a new effect).   Once again, the  volume
+cannot slide down below 0.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+7: Tremolo
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+Temolo means to "oscillate the sample volume using a  particular waveform
+with   amplitude   yyyy*(speed-1),	 such	that   (xxxx*speed)/64	 full
+oscillations occur in the line".  The waveform to use to oscillate is set
+using the  effect  E7  (see  below).	By	placing  tremolo  effects  on
+consecutive lines, the tremolo effect can be sustained for any	length of
+time.  If either  xxxx or yyyy are	0, then values	from the most  recent
+prior tremolo will be used.
+
+The usage of this effect is similar to that of effect 4:Vibrato.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+8: This effect is not used.
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+9: Set sample offset
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect allows you to start a sample from a specified position rather
+than the normal beginning position.   Multiply the value xxxxyyyy  by 512
+to get	the position  in bytes	from the  beginning of	the sample	where
+playback should start.	 If no sample is  specified with the effect,  but
+one is	currently  playing on  the	channel,  then the	sample	currently
+playing is retriggered to offset specified.
+
+An example is instrument 2 being  played at note C-3,  with xxxxyyyy=$23.
+This would make playback of the sample start at offset $23*$200  = $4600.
+This effect gives a rough range to play the sample from.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+A: Volume slide
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect  will change  the volume  of all  samples being  played on	a
+channel.  The values xxxx or yyyy specify the speed of the volume change.
+If xxxx is nonzero	the volume is increased,  and if yyyy is  nonzero the
+volume is decreased.   It is illegal for  both xxxx and  yyyy to be  non-
+zero.  You cannot slide past 64 or below 0.
+
+As an example, take  the yyyy to  be set to  3.  This  means that at  the
+beginning of the line, the current volume of the channel is  decreased by
+3.	The volume is decreased  by 3 again for  every tick on this  line and
+the lines  following (until  there is  a new  effect).	 Once again,  the
+volume cannot slide down below 0.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+B: Position Jump
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect xxxxyyyy parameter specifies a position in the	pattern table
+that playback should jump  to after this line.	 Legal values are  in the
+range of the number of patters that  are supposed to be in the	song (see
+section 2.3).  Values outside this range should be ignored.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+C: Set volume
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+Effect C will set the volume on a channel to the setting specified by the
+xxxxyyyy value.  Legal volumes are in the  range of 0 to 64.   An attempt
+to set the volume to a higher value than 64 will just set it to 64.
+
+I don't think we really need an example for this effect.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+D: Pattern Break
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect is equivalent to a	position jump to the next pattern  in the
+pattern table, with the arguments xxxx*10+yyyy specifying the line within
+that pattern to start playing at.  Note that this is NOT xxxx*16+yyyy.
+
+For example, the effect with  arguments xxxx=0, yyyy=0 would  simply jump
+to the first line in the next pattern in the pattern table	after playing
+the current line.	With arguments	xxxx=1 and yyyy=6  would jump to  the
+16th line of  the next	pattern in the	pattern table  after playing  the
+current line.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+E0: Set filter on/off
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This sets a hardware sound filter to ON (if yyyy is 0) or OFF (if xxxx is
+nonzero).  If your sound device  has built-in filters, you	should ignore
+this effect command.  This effect is primarily used on Amiga 500 and 2000
+computers to dick around with the hardware filter.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+E1: Fineslide up
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect functions just	like effect 1, except  that the frequency  of
+the sample is only modified once.	At the beginning of a  line, whatever
+frequency is being	played on  a channel  is incremented  by yyyy  notes.
+This effect does NOT continue on  the lines following.	You  cannot slide
+the frequency above the  note B-3 (unless you  implement octave 4 :  NON-
+STANDARD!).
+
+An example here would be effect  E, xxxx=1 (the extended  effect number),
+yyyy=3.  This  would slide the	current frequency up  three notes at  the
+beginning of the line.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+E2: Fineslide down
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect functions just	like effect 2, except  that the frequency  of
+the sample is only modified once.	At the beginning of a  line, whatever
+frequency is being	played on  a channel  is decremented  by yyyy  notes.
+This effect does NOT continue on  the lines following.	You  cannot slide
+the frequency below the  note C-1 (unless you  implement octave 0 :  NON-
+STANDARD!).
+
+An example here would be effect  E, xxxx=1 (the extended  effect number),
+yyyy=2.  This  would slide the	current frequency down	two notes at  the
+beginning of the line.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+E3: Set glissando on/off
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+The argument yyyy to this  effect specifies whether the  glissando effect
+is ON (yyyy  is 1) or  OFF (yyyy is  0).   If glissando  is on, then  the
+'Slide to note' will  slide a half note  at a time.   Otherwise, it  will
+perform the default smooth slide.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+E4: Set vibrato waveform
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect means to set the waveform appearance for succeeding 'vibrato'
+effects.  There  are currently	four possible appearances  for the	wave,
+each with a possible  'retrigger'.  Two cycles  are shown below for  each
+type of waveform:
+											 yyyy
+	Waveform   Name 			   Retriggered	No Retrigger
+	컴컴컴컴   컴컴컴컴컴컴컴	   컴컴컴컴컴�	컴컴컴컴컴컴
+	/\	/\	   Sine (default)			0			 4
+	  \/  \/
+
+	|\ |\	   Ramp down				1			 5
+	  \| \|
+
+	,-, ,-,    Square					2			 6
+	  '-' '-'
+
+	?????????  Random					3			 7
+
+A "retriggered" waveform will  be reset to  the start of  a cycle at  the
+beginning of each new note.   If a wave is selected  "without retrigger",
+the  previous  waveform  will  be  continued.	 Waveforms	 are  usually
+retriggered.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+E5: Set finetune value
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+This effect command sets the finetune value for the current instrument to
+the signed nibble value  yyyy.	This value	overrides the value found  in
+the sample information block at the  beginning of the MOD file.   The new
+finetune remains until changed by another E5 effect.
+
+		   Value:  7  6  5	4  3  2  1	0  F  E  D	C  B  A  9	8
+ Finetune to set: +7 +6 +5 +4 +3 +2 +1	0 -1 -2 -3 -4 -5 -6 -7 -8
+
+This effect  is implemented  by storing  period values	for all  possible
+finetunes, and simply switching to a different table of periods when this
+effect is encountered.	See section 3.3 for more information.	Section 4
+lists the period tables for finetunes for octaves 1 to 3.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+E6: Loop pattern
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+This effect  allows a  section of  a pattern  to be  'looped', or  played
+through, a certain number of times in succession.  If the effect argument
+yyyy is zero, the effect specifies the loop's start point.  Otherwise, it
+specifies the number of times to play this line and the  preceeding lines
+from the start point.	If no  start point was	specified in the  current
+pattern being played, the  loop start defaults to  the first line in  the
+pattern.  Therefore, you cannot loop through multiple patterns.
+
+An example:
+
+On line 3,	the effect E6  is encountered, with  yyyy=0.  This	specifies
+that line 3 is the beginning of a loop in this pattern.
+Down on line 52, the effect  E6 is encountered again, with yyyy=2.	 This
+means to jump back and play the lines from line 3 to  line 52 again twice
+more before continuing with the rest of the pattern.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+E7: Set tremolo waveform
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+Line command  E4,  this  sets  the	waveform  appearance  for  succeeding
+'tremolo'  (volume)  effects.     There   are  currently  four   possible
+appearances for the wave, each with  a possible 'retrigger'.   Two cycles
+are shown below for each type of waveform:
+											 yyyy
+	Waveform   Name 			   Retriggered	No Retrigger
+	컴컴컴컴   컴컴컴컴컴컴컴	   컴컴컴컴컴�	컴컴컴컴컴컴
+	/\	/\	   Sine (default)			0			 4
+	  \/  \/
+
+	|\ |\	   Ramp down				1			 5
+	  \| \|
+
+	,-, ,-,    Square					2			 6
+	  '-' '-'
+
+	?????????  Random					3			 7
+
+A "retriggered" waveform will  be reset to  the start of  a cycle at  the
+beginning of each new note.   If a wave is selected  "without retrigger",
+the  previous  waveform  will  be  continued.	 Waveforms	 are  usually
+retriggered.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+E8: This effect is not used.
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+E9: Retrigger sample
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+Effect E9 allows  you to re-trigger  a specified  sample at a  particular
+note after yyyy  ticks during the  line.   For example,  say note C-3  is
+specified, with yyyy=2 when  the speed is currently  6.  This would  mean
+that at the beginning  of the line the	specified sample is started,  and
+after two ticks it is restarted.   This continues until the  beginning of
+the next line.	This effect is used mostly with samples of hi-hats.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+EA: Fine volume slide up
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+This effect increments	the volume of  a particular  channel once at  the
+beginning of the line  by yyyy points.	 There is no continuation  of the
+slide on successive  lines or for  other notes.   You cannot slide	above
+volume 64.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+EB: Fine volume slide down
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+This effect is	just like  effect EA,  except the  volume is  decremented
+rather than incremented by the value  yyyy.  There is no  continuation of
+the slide on successive lines or for other notes.  You cannot slide below
+volume 0.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+EC: Cut sample
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+This effect sets the  volume of the  sample which is  playing to 0	after
+yyyy ticks in the current line.  This has the effect of stopping a sample
+abruptly.  An example here	is to play the	note C-2, with effect  EC and
+argument yyyy=3, when the speed is 6.  The sample is started  at note C-2
+at the beginning of the line, and after the third tick of 6 in that line,
+the volume on the  channel is set to  0 (cutting it off).	Note that  if
+yyyy is 0, nothing will be heard.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+ED: Delay sample
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+This effect delays the start of  a sample until tick yyyy in  the current
+line.  For example,  if note C-2 is  played, with effect ED  and argument
+yyyy=3 when the speed is 6.   The note C-2	will be triggered at  the 3rd
+tick after the start of the line.  The purpose of this effect is to delay
+the start of a sample for a VERY short amount of time.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+EE: Delay pattern
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+This effect  forces a  small delay	in a  pattern  in between  successive
+lines.	All notes and effects  continue during this delay.	 The argument
+yyyy specified the number of  line-equivalent time slices to  wait before
+resuming playback.	For example, if  effect EE is encountered  with speed
+being 6 and argument yyyy=4, then the next line will be delayed  24 ticks
+before it is executed.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+EF: Invert loop
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+This effect is used on the Amiga to play samples backward at  a specified
+speed.	It is not really  feasible to implement on	other architechtures,
+and it is not used that often.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+F: Set speed
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴-
+This effect changes the  speed of playback so  that xxxxyyyy ticks	occur
+during every line, starting on the NEXT line.  The initial	speed (before
+any 'set speed' effects are encountered) should be set to 6.   A value of
+xxxxyyyy=0 should technically cause playback  to stop, but this  value is
+commonly ignored as garbage.
+
+Valid values for speed setting in this manner are 1 to 31.	If a value is
+read that is above 31,	it means to set  a modified speed based  on beats
+per minute, where 4 lines are  1 beat.	This means	that if I try  to set
+the speed to 42, I am  specifying 42 beats per minute, or  42*4=168 lines
+per minute.    You then  have  to  figure out  how	long  to spend	on	a
+particular line.
+
+If multiple set speed  effects are performed on  a single line, then  the
+effects on the higher-numbered channels have precedence over  the effects
+on the lower-numbered channels.
+
+This effect has the largest  number of implementations and	is particular
+to the number of effects that a particular file player supports.
+

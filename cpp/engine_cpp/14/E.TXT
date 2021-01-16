@@ -1,0 +1,6 @@
+- MAP
+- VECTOR / MATROX / math stuff
+- NODE (node in hierarchy - just the vasic stuff - rotation, etc)
+- MESH (inherits from NODE)
+- SCENE (rendering & MESHES)
+

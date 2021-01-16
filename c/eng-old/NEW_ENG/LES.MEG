@@ -1,0 +1,27 @@
+Faen...
+
+Dette er den siste versjonen hvor keyframing er funksjonibel...
+Den nyere har mer implementert, men funker ikke helt 100% :-/
+Det er bare texture her, ike gouraud-texture..
+Hvis du/dere vil, kan dere se p† poly.*, og legge til interpolering av color
+i tillegg til U og V der... Enkel sak.. copy/paste omtrent...
+Og se i den andre/gamle enginen hvordan man lager lys...
+
+ok?
+
+Skal legge alt jeg har av forskjellige versjoner av enginen i Šn engine
+snart, s† vi har alt klart...
+
+Og keyframeren er litt rar her... Man m† lage en lengre keyframe enn den som
+faktisk brukes, ellers f†r den er litt rar "twist" p† slutten...
+
+pr›v "t1 birdshow.3ds" og se :)
+
+aoxn, torhs@funcom.com
+
+btw: Watcom 11 diskene fra andreas fucka opp.. multi-disk zip, disk #3 har
+error :-/  F†r ikke pakka ut resten (disk 3 og utover... )....
+
+M† f† den p† nytt.,... Skal s›ke litt p† IN og se om jeg finner den, ellers
+m† jeg f† den p† nytt...
+

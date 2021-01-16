@@ -1,0 +1,10 @@
+Samme prinsipp som EnvMap, men:
+
+ş tx1 og ty1 etc indikerer hvilken farge hj›rnene har, s† interpolerer
+  vi mellom disse istedenfor † interpolere b†de TX og TY, hente
+  fargen, og bruke denne...
+ş S, behold beregninger av alle TX-ting, men forandre til C(olor).
+  Y-verdiene brukes jo ikke lenger, s†, fjern disse...
+
+Har forandra ‚n innerloop - nxInner1 eller noe slikt - 4 instruksjoner
+bare nuh!

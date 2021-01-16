@@ -1,0 +1,207 @@
+ToDo / Ideas / etc...
+
+- Z-clipping
+- Bounding sphere
+- Perspective texture
+- Fillers: Gouraud, Gouraud Texture, Lambert texture, Lambert
+- Lights: Point (omni), Directional (spot?)
+- Material, load textures as they're found, Set flags in material for
+  shading methods.
+  Texture   - texture
+  Relection - EnvMap.
+  Bump map  - Bump
+  Opacity   - Alpha
+- Texture U/V wrapping
+- Hazing/fogging
+
+-----------------------------------------------------------------------------
+
+Lights:
+
+omni... Point light source..
+
+Engine_Update : light to world (pos)
+                object to world
+                inv obj, process light with the resulting matrix
+
+-----------------------------------------------------------------------------
+
+S-Buffer.. Fikser det meste av sorting bugs...
+
+typedef struct sSpanData;
+
+typedef struct sSpan
+{
+ int x1,x2;             // Needed for clipping
+ sSpanData *Data;       // data for filler
+ struct sSpan *Next;    // next for double linked list
+ struct sSpan *Prev;    // prev for double linked list
+} sSpan;
+
+typedef struct sSpanList
+{
+ sSpan *First;
+ sSpan *Previous;       // Last span inserted..
+} sSpanList[200];
+
+Istedenfor † tegne horisontal linje med en gang i filler, settes den inn
+i spanlista, omtrent slik:
+
+- Polyene sorteres med minst z "tegnes" f›rst
+- Sjekk spanlist element samme som Y
+- g† gjennom lista, og sett inn current span p† rriktig plass
+- hvis current span overlapper span i lista, klippes current span slik at
+  bare det ikke-overlappende settes inn...
+  Klipp, og sjekk videre med "ny" span...
+
+Problemer:
+
+- Span Insertion... Brute force blir † s›ke fra begynnelsen av lista for
+  hvert element... Det kan bli noen etterhvert...
+  Annet man kan gj›re, er † ha pointer (som over) til b†de begynnelsen og
+  "last inserted". Sjekk last inserted, hvis mindre g† left, ellers g†
+  right...
+  #debug versjon kan ha noen ekstra data, gjennomsnittlig antall steps for
+  † finne korrekt plass... etc...
+
+-----------------------------------------------------------------------------
+
+  En ting som KANSKJE g†r an, er † allokere at slags "Used" buffer....
+  N†r man inserter et span, begynner man † fylle dette bufferet med antall
+  pixler som er igjen av linja...
+
+  noe al :
+
+  stosb
+  dec al
+  stosb
+  dec al
+  etc, etc...
+
+  S†, n†r man skal tegne linja, finner man korrekt screen pixel. Hvis
+  denne ikke er null (0), legger man til denne verdien til screenpos,
+  klipper litt, og sjekker p† nytt p† den nye adressen man finner...
+
+-----------------------------------------------------------------------------
+
+S-buffer...
+
+Hva med † p›se p† spans til span-buffer i poly-"filler" uten † sortere
+eller klippe.
+Deretter kan man kj›re gjennom en post-process, som sorterer og klipper...
+
+sSpan *Left
+sSpan *Right
+sSpanData *Data
+
+
+
+sSpan
+{
+ int x1,x2
+ int z1,z2
+ int u1,u2
+ int v1,v2
+ int c1,c2
+ sSpan *Left,*Right;
+ sPolygon *P;           // _OR_ sMaterial *M;
+}
+
+leftedge
+{
+ sSpan *Left[200]
+ sSpan *Previous[200]     // last inserted in this line
+}
+
+insert span:
+------------
+
+- Check Previous[y] first.
+- Go left or right, depending on X
+- If necessary, clip span
+- Insert span..
+
+-----------------------------------------------------------------------------
+
+ 0 -> aaaaa -> bbbbbbbbbb -> ccc -> 0
+
+ nnnnnn (n=new)
+
+ s = SoanBuffer.FirstSpan;
+
+ // s›ker forbi alle "mindre" spans
+ while (n.x1 > s.x2) s = s->Next;
+
+ // vi har funnet et av f›lgende alternativer:
+
+a    ssssss
+   nn
+
+b    ssssss
+   nnnnn
+
+c    ssssss
+   nnnnnnnnnn
+
+d    ssssss
+      nnnn
+
+e    ssssss
+      nnnnnnn
+
+if (n.x1 < s.x1)
+{
+ if (n.x2 < s.x1) just_insert_span_as_it_is
+ if (n.x2 > s.x1) clip_n_at_s.x1_and_insert_span
+ if (n.x2 > s.x2) 1:clip_n_at_s.x1_and_insert_span
+                  2:continue with new span, now as e
+}
+else
+{
+ if (n.x2 < s.x2) skip n
+ if
+}
+
+-----------------------------------------------------------------------------
+
+typedef struct sSpan
+{
+ ...
+}
+
+sSpan *AvailableSpans;
+sSpan *SpanBuffer;
+
+1. Convert entire polygon to spans, sort of like the good old EdgeBuffer
+   polyfiller... Grab Spans from AvailableSpans;
+
+-----------------------------------------------------------------------------
+
+Ha et buffer til i tillegg til BackGroundBuffer, f.eks AlreadyDrawnBuffer
+Man har som vanlig en counter hvor mange pixler det er igjen † tegne p†
+linja.. I tillegg til † plotte pixel p† skjerm, som vanlig, plotter man
+ogs† denne counteren til AlreadyDrawn bufferet...
+F›r tegning av pixel, sjekker man dette bufferet. Hvis det ligger en verdi
+der, skipper man s† mange pixler f›r man begynner † tegne..
+
+- Fordeler: Man plotter hver pixel bare ‚n gang, tegner front-to-back, og
+  kan skippe en hel bunch med pixler i slengen.
+  Egentlig ganske like Z-buffer, men man kan skippe flere pixler i
+  slengen, og man m† ha sortering i tilleg
+
+- Bakdeler: Man m† sjekke bufferet for hver pixel som
+  tegnes, og man m† slette dette for hver frame.
+
+±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+Rendering pipeline:
+
+
+- Display traversal
+- Modelling transformation
+- Trivial accept/reject classification
+- Lighting
+- Viewing transformation
+- Clipping
+- Division by w and mapping to 3d viewport
+- Rasterization

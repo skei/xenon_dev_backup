@@ -1,0 +1,33 @@
+;-----------------------------------------------------------------------------
+; SetModeX - Sets the VGA in Tweaked ModeX 320x400x256.
+;-----------------------------------------------------------------------------
+
+proc    SetModeX
+        mov     ax,0013h                ; Sets VGA linear 320x200x256
+        int     10h
+        mov     dx,3C4h                 ; Disable Chain-Four
+        mov     ax,0604h
+        out     dx,ax
+        mov     dx,3C4h                 ; Enable Write to All Four Planes
+        mov     ax,0F02h
+        out     dx,ax
+        mov     ax,0A000h               ; Clear Display Memory
+        mov     es,ax
+        xor     di,di
+        xor     ax,ax
+        mov     cx,8000h
+        cld
+        rep     stosw
+        mov     dx,3D4h                 ; Reprogram CRT Controller:
+        mov     ax,00014h               ; turn off dword mode
+        out     dx,ax
+        mov     ax,0e317h               ; turn on byte mode
+        out     dx,ax
+        mov     ax,00009h               ; cell height
+        out     dx,ax
+        mov     dx,3D4h                 ; Sets Logical Screen Width
+        mov     al,13h
+        mov     ah,SCREENWIDTH/8
+        out     dx,ax
+        ret
+endp    SetModeX

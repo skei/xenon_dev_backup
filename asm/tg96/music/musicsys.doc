@@ -1,0 +1,371 @@
+
+
+                       Noice Music System 2.0 preBeta
+                       ÄÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÄ
+
+
+
+                          This is a first_try doc.
+                     It contains only the basic stuff.
+
+
+First a big thanx to these guys:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+Magnus Eriksson     - For letting me use his GUS before i got my own (AGAIN!)
+                      For helping me with solving those strange bugs!
+Daniel Sangenberg   - For letting me HAVE his dynaquake (PAS16 + SB)
+Daniel Boromisa     - For lending me a SBPRO ][
+Adam Seychell       - Specially for DOS32 and for listening and giving advice!
+Fredrik Kling       - Always saying that it didn't work and for thanking me
+                      when it did! =)
+Petteri Kangaslampi - For the PAS SDK sources + valuble information from MIDAS.
+Jarno Paananen      - For releasing the MIDAS sources public.
+Andr‚ Baresel
+& Craig Jackson     - For the excellent Soundblaster documentation!
+                      People writing SDK's - follow these guys example!
+Advanced Gravis     - For the SDK, the card and the none existing support!
+Creative Labs       - For absolutly NOTHING! WHY? what is there too loose
+                      on releasing hardware information about the AWE32??
+Media Vision        - For trying to give me a PAS SDK.
+
+And all the guys in the usenet groups who have helped me!
+
+
+Introduction:
+ÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+This music system is for guys who know what this is allready. =)
+If you don't know... Sorry... Don't want to waste my energy explaining something
+someone else can do better... =)
+
+The best of reasons to use this musicsystem is that it's so FREE, that even
+companies can use this in their productions with no fee.NOTE! this might
+change for future versions , but for now it's free.The only thing I'm
+asking from the user is credits to me visible somewhere in the production.
+
+The reason I'm releasing this as a object file is that there are too many
+people taking credits for other peoples work. If you really want to know how
+I did something in the code we can come to an agreement I'm sure...
+
+Features:
+ÍÍÍÍÍÍÍÍÍ
+
+[Reality:]
+
+ş Soundcards:
+ù Gravis Ultrasound , ACE , MAX (Hardware Mixing)
+ù Pro Audio Spectrum , PAS+ , PAS16
+ù Soundblaster 1.0-2.0 , SBPRO 1-3 , SB16 , AWE32(SB16)
+ù NoSound
+
+ş Module formats:
+ù Noise-/Pro-/Star-/Fast-tracker modules (.MOD)
+ù Dynamic Studio II modules (.DSM) *1
+ù Screamtracker 3.01-3.20 modules (.S3M) *1
+
+ş Protected mode systems:
+ù DOS32 3.01+
+
+[In Progress:]
+
+ù 8 Chn sound effect support!
+
+ş Soundcards:
+ù Gravis Ultrasound , ACE , MAX (Software Mixing)
+ù AWE32
+ù Windows sound system
+
+ş Module formats:
+ù FastTracker ][ extended modules (.XM)
+ù MultiTracker modules (.MTM)
+ù X-Tracker modules (.DMF)
+
+
+*1 - Not all commands are supported, may sound very weird!
+
+Usage:
+ÍÍÍÍÍÍ
+
+There are to ways, the easy one and the hard one:
+
+The easy way:
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+call    music_autoinit
+if      carry set then ErrorNumber=music_error;
+                       ErrorTxtPtr=music_errors[ErrorNumber*4]
+else    MusicsystemnamePtr=eax;
+        SoundDriverNamePtr=ebx;
+        PMHandlerNamePtr=ecx;
+                                        (* This will autodetect the soundcard present and use the card found in this
+                                           order: GUS , PAS , SB , NOSound.*)
+:Play
+let     esi=ModulePtr
+                                        (* Pointer in memory where the module is present *)
+call    music_autoplay
+if      carry set then call music_autoexit;
+                       ErrorNumber=music_error;
+                       ErrorTxtPtr=music_errors[ErrorNumber*4];
+                       End
+else    ModuleFormatNamePtr=eax         (* If there was no error it should be playing! *)
+
+waitkey
+
+call    music_autostop                  (* Stops playing the module *)
+if      more modules then goto Play
+call    music_autoexit                  (* Shutdown soundcard driver *)
+end
+
+
+or:
+
+
+let     esi=ConfigfilenamePtr;          (* ASCIIZ! , Set esi to zero if you don't want any config file save *)
+call    music_autoconfig
+if      carry set then ErrorNumber=music_error;
+                       ErrorTxtPtr=music_errors[ErrorNumber*4]
+else    MusicsystemnamePtr=eax;
+        SoundDriverNamePtr=ebx;
+        PMHandlerNamePtr=ecx;
+                                        (* This will prompt the user for his/her soundcard configuration and use the card *)
+:Play
+let     esi=ModulePtr
+                                        (* Pointer in memory where the module is present *)
+call    music_autoplay
+if      carry set then call music_autoexit;
+                       ErrorNumber=music_error;
+                       ErrorTxtPtr=music_errors[ErrorNumber*4];
+                       End
+else    ModuleFormatNamePtr=eax         (* If there was no error it should be playing! *)
+
+waitkey
+
+call    music_autostop                  (* Stops playing the module *)
+if      more modules then goto Play
+call    music_autoexit                  (* Shutdown soundcard driver *)
+end
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+The hard way:
+
+Don't bother! Yet..
+
+
+Functions:
+ÍÍÍÍÍÍÍÍÍÍ
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_autoinit:near
+
+Description:    Autodetect and initialize soundcard
+
+Input:          none
+
+Output:         carry set - failed!
+                carry clear - OK!
+                eax - pointer to musicsystem name with (13,10,36)
+                ebx - pointer to soundcard name ending with (13,10,36)
+                ecx - pointer to dosextender name ending with (13,10,36)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_autoconfig:near
+
+Description:    Autodetect and initialize soundcard
+
+Input:          esi - pointer to asciiz string containing config filename.
+                      if you don't want it to save a config file just let esi be zero.
+
+Output:         carry set - failed!
+                carry clear - OK!
+                eax - pointer to musicsystem name with (13,10,36)
+                ebx - pointer to soundcard name ending with (13,10,36)
+                ecx - pointer to dosextender name ending with (13,10,36)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_autoexit:near
+
+Description:    Deinitializes the soudncard driver.
+
+Input:          none
+
+Output:         none
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_autoplay:near
+
+Description:    Initliaizes a module and starts playing it.
+
+Input:          esi - pointer to module.
+
+Output:         carry set - failed!
+                carry clear - OK!
+                eax - pointer to module format name ending with (13,10,36)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_autostop:near
+
+Description:    Stops playing the module and deinitializes it.
+
+Input:          none
+
+Output:         none
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_autodetect:near (Advanced)
+
+Description:    Detects which soundcards are present in system.
+
+Input:          esi - pointer to driver list containing pointers to driver command lists.Ends with a -1.d
+                      use music_drivers.
+                edi - pointer to empty buffer.
+Output:         carry set - None detected.
+                carry clear - OK!
+                edi - pointer to list of useable cards, if any. Ends with a -1.d.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_autoidentify:near (Advanced)
+
+Description:    Determines the module format.
+
+Input:          esi - pointer to format list containing pointers to format command lists.Ends with a -1.d
+                      use music_formats.
+                edi - pointer to empty buffer.
+Output:         carry set - Not identified.
+                carry clear - OK!
+                edi - pointer to format command structure, if any. Ends with a -1.d.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_detect:near (Advanced)
+
+Description:    Tests if soundcard present.
+
+Input:          esi - pointer to driver command list.
+Output:         carry set - Failed!
+                carry clear - OK!
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_setcard:near (Advanced)
+
+Description:    Sets the card wanted. This must be called before any activity with soundcard!
+
+Input:          esi - pointer to driver structure.
+
+Output:         none
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_init:near (Advanced)
+
+Description:    Initializes the soundcard set with music_setcard.
+
+Input:          none
+
+Output:         carry set - failed!
+                carry clear - OK!
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_exit:near (Advanced)
+
+Description:    DeInitializes the soundcard set with music_setcard.
+
+Input:          none
+
+Output:         none
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_identify:near (Advanced)
+
+Description:    Tests if it's the correct driver for module.
+
+Input:          esi - pointer to format command list.
+                edi - pointer to module.
+Output:         carry set - Failed!
+                carry clear - OK!
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_setformat:near (Advanced)
+
+Description:    Set module format requested. This must be called before playing the module.
+
+Input:          esi - pointer to format structure.
+                edi - pointer to module
+Output:         node
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_initplay:near (Advanced)
+
+Description:    Initializes the module player set with music_setformat.
+
+Input:          none
+
+Output:         none
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_exitplay:near (Advanced)
+
+Description:    DeInitializes the module player set with music_setformat.
+
+Input:          none
+
+Output:         none
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_play:near (Advanced)
+
+Description:    Activates the module player.
+
+Input:          none
+
+Output:         none
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Function:       music_stop:near (Advanced)
+
+Description:    Deactivates the module player.
+
+Input:          none
+
+Output:         none
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Variables:
+ÍÍÍÍÍÍÍÍÍÍ
+
+Variable:       music_drivers:dword
+Description:    Pointer to a list of driver pointers.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Variable:       music_formats:dword
+Description:    Pointer to a list of format pointers.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Variable:       music_jmp_tick:dword
+Description:    Pointer to a piece of code that the module will call every tick.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Variable:       music_jmp_row:dword
+Description:    Pointer to a piece of code that the module will call every change of row.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Variable:       music_jmp_cmd:dword
+Description:    Pointer to a piece of code that the module will a special command is used.
+                In the mod format it's command 8. It can be used to sync production.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Variable:       music_jmp_end:dword
+Description:    Pointer to a piece of code that the module will when the module ends.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Variable:       music_modulepos:dword
+Description:    Contains Songpos.w+Pattpos.w.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Variable:       music_error:dword
+Description:    Contains the error code if an error has occured.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Variable:       music_errors:dword
+Description:    A list of pointers to error messages.
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Final words:
+ÍÍÍÍÍÍÍÍÍÍÍÍ
+
+The doc was written in less then a hour. Phew...
+I've worked for five months with this system.
+It takes my breath away..=)
+
+Contact me:
+ÍÍÍÍÍÍÍÍÍÍÍ
+
+email:          network@algonet.se
+www:            http://www.algonet.se/~network
+finger&talk:    network@sophocles.algonet.se
+phone:          +46-31-575-975
+snail:          Alexander Boczar
+                Ingeb„cksv. 6B
+                425 65 Hisings K„rra
+                Sweden
+
+
+[EOF]
+
+
+

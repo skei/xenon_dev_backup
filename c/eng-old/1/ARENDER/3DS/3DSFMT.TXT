@@ -1,0 +1,91 @@
+CHUNK_RGBF              = 0x0010 RGB float
+
+3 floats: r,g,b
+
+CHUNK_RGBB              = 0x0011 RGB byte
+
+3 bytes: r,,b
+
+CHUNK_PRJ               = 0xC23D Project
+CHUNK_MLI               = 0x3DAA Material Library
+CHUNK_MAIN              = 0x4D4D Main
+ CHUNK_OBJMESH          = 0x3D3D Object Mesh
+  CHUNK_BKGCOLOR        = 0x1200 Background color
+  CHUNK_AMBCOLOR        = 0x2100 Ambient color
+  CHUNK_OBJBLOCK        = 0x4000 Object Block
+
+ASCIIZ file name
+
+   CHUNK_TRIMESH        = 0x4100 Tri-Mesh
+    CHUNK_VERTLIST      = 0x4110 Vertex list
+
+short int : number of vertices (each: float x,y,z)
+
+    CHUNK_VERTFLAGS     = 0x4111 Vertex flag list
+    CHUNK_FACELIST      = 0x4120 Face list
+
+short int : number of polygons (each: short int a,b,c,flags)
+flags: 04,02,01 = ab,bc,ca
+       08,10 = uwrap,vwrap
+
+    CHUNK_FACEMAT       = 0x4130 Face material
+
+ASCIIZ material name
+short int: num_faces_with_this_material (each: short int = poly number)
+
+    CHUNK_MAPLIST       = 0x4140 Mapping list
+
+short int: number of U/V mappings (each: float u,v )
+
+    CHUNK_SMOOLIST      = 0x4150 Smoothings
+
+
+
+    CHUNK_TRMATRIX      = 0x4160 Matrix
+
+3x4 matrix (floats)... 3x3 + 1x3 ???
+
+    CHUNK_MESHCOLOR     = 0x4165 Mesh color
+    CHUNK_TXTINFO       = 0x4170 Texture info
+   CHUNK_LIGHT          = 0x4600 Light
+
+float x,y,z // pos
+
+    CHUNK_SPOTLIGHT     = 0x4610 Spotlight
+   CHUNK_CAMERA         = 0x4700 Camera
+
+float x,y,z // pos
+float x,y,z // target
+
+   CHUNK_HIERARCHY      = 0x4F00 Hierarchy
+  CHUNK_VIEWPORT        = 0x7001 Viewport info
+  CHUNK_MATERIAL        = 0xAFFF Material
+   CHUNK_MATNAME        = 0xA000 Material name
+   CHUNK_AMBIENT        = 0xA010 Ambient color
+   CHUNK_DIFFUSE        = 0xA020 Diffuse color
+   CHUNK_SPECULAR       = 0xA030 Specular color
+   CHUNK_TEXTURE        = 0xA200 Texture map
+   CHUNK_BUMPMAP        = 0xA230 Bump map
+   CHUNK_MAPFILE        = 0xA300 Map filename
+  CHUNK_KEYFRAMER       = 0xB000 Keyframer data
+   CHUNK_AMBIENTKEY     = 0xB001 Ambient key
+   CHUNK_TRACKINFO      = 0xB002 Track info
+    CHUNK_TRACKOBJNAME  = 0xB010 Track Obj. Name
+    CHUNK_TRACKPIVOT    = 0xB013 Pivot point
+    CHUNK_TRACKPOS      = 0xB020 Position keys
+    CHUNK_TRACKROTATE   = 0xB021 Rotation keys
+    CHUNK_TRACKSCALE    = 0xB022 Scale keys
+    CHUNK_TRACKMORPH    = 0xB026 Morph keys
+    CHUNK_TRACKHIDE     = 0xB029 Hide keys
+    CHUNK_OBJNUMBER     = 0xB030 Object number
+   CHUNK_TRACKCAMERA    = 0xB003 Camera track
+    CHUNK_TRACKFOV      = 0xB023 FOV track
+    CHUNK_TRACKROLL     = 0xB024 Roll track
+   CHUNK_TRACKCAMTGT    = 0xB004 Camera target track
+   CHUNK_TRACKLIGHT     = 0xB005 Pointlight track
+   CHUNK_TRACKLIGTGT    = 0xB006 Pointlight target track
+   CHUNK_TRACKSPOTL     = 0xB007 Spotlight track
+   CHUNK_FRAMES         = 0xB008 Frames
+
+
+

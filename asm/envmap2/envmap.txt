@@ -1,0 +1,10 @@
+컴컴컴컴컴컴컴컴컴컴컴컴
+Inner:
+ mov bl,ch              shld ebx,ecx,8
+ shld ebx,ecx,8         mov bh,ch
+ add ecx,12345678h      add ecx,12345678h
+ mov bl,[bx]            mov bl,[Texture+bx]
+ mov [es:di+bp],bl      mov [edi+ebp],bl
+ inc bp                 inc ebp
+ jnz Inner              jnz inner
+컴컴컴컴컴컴컴컴컴컴컴컴

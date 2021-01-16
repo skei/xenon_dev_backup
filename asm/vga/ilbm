@@ -1,0 +1,303 @@
+
+MaxX      equ    128                    ;Max skjermbredde i byter
+MaxBpl    equ    8                      ;Max # bitplanes
+BufLen    equ    10000                  ;Filbuffer lengde
+
+
+Dseg      segment
+Xoffset   dw     0
+Yoffset   dw     0
+LWD       db     (?),(?),(?),(?)
+buf       db     BufLen dup (0)
+Bitmap    db     MaxX*MaxBpl dup (?)
+Fnavn     db     'SNAKE.LBM',0
+FNokkel   dw     (?)
+BufPek    dw     BufLen
+Feil      db     0                      ;Feilkode hvis noe svikter
+                                        ;0=Ok
+                                        ;1=Fil feil
+;ILBM struktur
+ScreenW   dw     0                      ;Skjerm bredde i pixels
+ScreenH   dw     0                      ;Skjerm hoyde i pixels
+Xpos      dw     0                      ;Bildets X posisjon
+Ypos      dw     0                      ;Bildets Y posisjon
+Bplanes   db     0                      ;Antall bitplan ( =Ln(ant.farger)/Ln(2) )
+Masking   db     0                      ;'Filter' teknikk
+Compress  db     1                      ;Pakke algoritme
+          db     0                      ;Ubrukt (for like adresser)
+TransCol  dw     0                      ;Bakgrunnsfarge
+Xaspect   db     10                     ;\ Disse to verdiene brukes for a fa
+Yaspect   db     11                     ;/ firkantede punkter pa skjermen
+PageW     dw     0                      ;Sidens bredde i pixels
+PageH     dw     0                      ;Sidens hoyde i pixels
+
+
+Init:
+;Initialiserer programmet
+          mov    ax,13h
+          int    10h
+          mov    ax,dseg
+          mov    ds,ax
+          mov    ax,0a000h                ;Skjerm segment
+          mov    es,ax
+          ret
+
+
+OpenFile:
+;Denne rutinen †pner en fil med navnet i DS:DX
+          xor    al,al                    ;Bare les
+          mov    ah,3dh
+          lea    dx,Fnavn
+          int    21h                      ;Apn fil med navn i DS:DX
+          jnc    Apen
+          jmp    FilFeil
+Apen:     mov    FNokkel,ax               ;Lagre filnokkel
+          ret
+
+
+LesFarger:
+;Denne rutinen leser inn paletten fra fil inn i palettregistrene.
+          mov    ax,'CM'
+          mov    bx,'AP'
+          call   FinnHead                 ;Finn 'CMAP' headeren
+          call   InnLong                  ;Les CMAP lengde
+          mov    cx,word ptr LWD+2        ;\ Bruk kun laveste ord da det ikke er
+          xchg   ch,cl                    ;/ sannsynlig med mer enn 21845 farger
+          xor    al,al
+          mov    dx,03c8h
+          out    dx,al                    ;Skriv fra farge nr 0 i palett
+          mov    dx,03c9h                 ;Fra denne porten hentes RGB verdier
+Lokke:    call   InnByte                  ;Les farge komponent i AL
+          shr    al,1                     ;\ Del AL med 4 for a fa
+          shr    al,1                     ;/ 0 til 63 intensiteter
+          out    dx,al                    ;Skriv farge komponent
+          loop   lokke                    ;Les inn neste RGB hvis det er noen
+          mov    ax,BufLen
+          mov    BufPek,ax                ;Reset loade buffer
+          ret
+
+
+LesBODY:
+;Denne rutinen leser inn bitmapen fra ILBM filen og legger bildet p† skjermen.
+          mov    ax,'BO'
+          mov    bx,'DY'
+          call   FinnHead                 ;Finn 'BODY' headeren
+          call   InnLong                  ;Les BODY lengde
+          mov    bx,40
+          mov    cx,200                   ;bildets hoyde
+NyLinje:  push   cx
+          call   LagBitmap                ;Hent linje fra fra fil i ILBM form
+          call   render                   ;Oversett ILBM bitplan til pixels
+          inc    Yoffset                  ;Klargj›r for neste linje
+          pop    cx
+          loop   NyLinje                  ;Pakk neste linje hvis den eksisterer
+          ret
+
+
+LagBitmap:
+;Denne rutinen pakker opp bitmapen i ILBM filen
+          mov    ax,8                     ;Antall bitplan
+          mov    cx,40                    ;Skjermens bredde i pixels/8
+          mul    cx                       ;Antall byter i alle bitplan -> AX
+          mov    bx,ax
+          lea    di,BitMap
+PakkOpp:  Call   Innbyte
+          or     al,al
+          jl     Fyll
+          mov    cl,al
+          inc    cl
+kopi:     call   InnByte
+          mov    [di],al
+          inc    di
+          dec    bx
+          loop   kopi
+          or     bx,bx
+          jnz    PakkOpp
+          jmp    BitmapOk
+Fyll:     mov    cl,al
+          neg    cl
+          inc    cl
+          call   innbyte
+F:        mov    [di],al
+          inc    di
+          dec    bx
+          loop   F
+          or     bx,bx
+          jnz    PakkOpp
+BitmapOk: ret
+
+
+render:
+;Denne rutinen oversetter fra ILBM's bitplan format til skjermen.
+          mov    cx,320                   ;Skjermens fysiske bredde
+          xor    bx,bx                    ;Nullstill byte offset til bitplan
+          mov    Xoffset,0                ;Lese fra pixel lengst til venstre
+          mov    dl,80h                   ;Pixel maske settes til venstre
+NextPix:  mov    dh,1                     ;Bitplan eksponent (1,2,4,8,16...)
+          lea    di,bitmap                ;ILBM bitmap start
+          xor    al,al                    ;Nullstill farge verdi
+          push   cx
+          mov    cx,8                     ;Antall fysiske bitplan aktive
+NesteBp:  mov    ah,[di+bx]               ;Les inn bitplan data
+          and    ah,dl                    ;Er den aktuelle pixel tent?
+          jz     IkkeTent
+          or     al,dh                    ;Sett riktig bit i farge verdi
+IkkeTent: add    di,40                    ;Finn neste bitplan
+          sal    dh,1                     ;2^bitplan nummer
+          loop   NesteBp                  ;Beregn neste bitplan hvis flere
+          call   PutPixel                 ;Skriv pixel p† skjermen
+          ror    dl,1                     ;Neste byte offset
+          cmp    dl,80h                   ;Skal byte offset ›kes med 1?
+          jne    IkkeByte                 ;Hopp hvis nei
+          inc    Bx                       ;Neste byte offset
+IkkeByte: inc    Xoffset                  ;Neste X verdi
+          pop    cx
+          loop   NextPix
+          ret
+
+InnByte:
+;Henter en byte fra filen inn i AL.
+;En buffer er brukt for a fa fart over tingene.
+          push   bx
+          push   cx
+          push   dx
+          push   bp
+          push   si
+          push   di
+          mov    si,BufPek                 ;Buffer peker
+          cmp    si,BufLen                 ;Skal buffer fornyes?
+          jne    OkBuf                     ;Hopp hvis nei
+          mov    bx,FNokkel
+          mov    ah,3fh                    ;Les...
+          lea    dx,Buf                    ;Starten til buffer som skal leses
+          mov    cx,BufLen                 ;Lengde pa buffer som skal leses
+          mov    BufPek,0                  ;Nullstill bufferpeker
+          int    21h                       ;Les buffer!
+          mov    si,BufPek                 ;Les byte herfra
+          jnc    OkBuf
+          jmp    FilFeil
+OkBuf:    mov    al,[si+buf]               ;Les byte
+          inc    BufPek
+          pop    di
+          pop    si
+          pop    bp
+          pop    dx
+          pop    cx
+          pop    bx
+          ret
+
+
+Skip:
+;Denne rutinen f†r filpekeren til † hoppe X antall plasser
+;fremover, som bestemt av CX og DX.
+          push   ax
+          push   bx
+          mov    ax,dx                     ;\
+          and    ax,1                      ; \ Hopp ALLTID et like antall
+          jz     like                      ; / byter fremover!
+          inc    dx                        ;/
+like:     mov    bx,Fnokkel
+          mov    ax,4201h
+          int    21h                       ;Steng!
+          jnc    SkipOk
+          jmp    FilFeil
+SkipOk:   pop    bx
+          pop    ax
+          ret
+
+
+seek:
+;Denne rutinen plassere filpekeren som bestemt av CX og DX.
+          push   ax
+          push   bx
+          mov    bx,Fnokkel
+          mov    ax,4200h
+          int    21h                       ;S›k!
+          jnc    FlyttOk
+          jmp    FilFeil
+FlyttOk:  pop    bx
+          pop    ax
+          ret
+
+
+PutPixel:
+;Rutine for † sette en pixel bestemt av Xoffset, Yoffset
+;og AL (farge).
+;Virker for 320x??? 256 fargers VGA.
+          push   dx
+          push   bx
+          push   ax
+          mov    bx,Xoffset
+          mov    ax,140h
+          mul    yoffset
+          add    bx,ax
+          pop    ax
+          mov    es:[bx],al              ;Sett punktet
+          pop    bx
+          pop    dx
+          ret
+
+
+FinnHead:
+;Flytter filpekeren til header navngitt med 4 ASCII tegn i AX og BX.
+          xor    cx,cx                   ;\  Flytt filpekeren
+          mov    dx,12                   ; > til etter 'ILBM'
+          call   seek                    ;/  headeren.
+Let:      call   Innlong                 ;Les navnet p† header
+          cmp    LWD,ah                  ;\
+          jne    FeilHead                ; \
+          cmp    LWD+1,al                ;  \
+          jne    FeilHead                ;   \  Unders›k om den
+          cmp    LWD+2,bh                ;    > riktige headeren
+          jne    FeilHead                ;   /  er funnet.
+          cmp    LWD+3,bl                ;  /
+          jne    FeilHead                ; /
+          jmp    OkHead                  ;/
+FeilHead: call   Innlong                 ;Les hvor mange byter til neste header
+          mov    cx,word ptr LWD
+          xchg   ch,cl                   ;Gj›r om til IBM format
+          mov    dx,word ptr LWD+2
+          xchg   dh,dl                   ;Gj›r om til IBM format
+          call   Skip                    ;Hopp til neste header
+          jmp    Let
+OkHead:   ret
+
+
+Innlong:
+;Denne rutinen leser inn et dobbelt ord fra filen til 'variabelen' LWD.
+          Push   ax
+          push   bx
+          mov    bx,FNokkel
+          mov    ah,3fh
+          mov    cx,4
+          lea    dx,LWD
+          int    21h                     ;Les 4 bytes!
+          jnc    Okles
+          jmp    FilFeil
+OkLes:    cmp    cx,ax
+          je     OkLong
+          jmp    FilFeil
+OkLong:   pop    bx
+          pop    ax
+          ret
+
+
+CloseFile:
+;Denne rutinen stenger filen.
+          mov    bx,Fnokkel
+          mov    ah,3eh
+          int    21h                     ;Steng fil
+          jnc    Stengt
+          jmp    FilFeil
+Stengt:   ret
+
+
+FilFeil:
+;Denne rutinen aktiviseres ved feil.
+;Den avslutter programmet p† en trygg m†te.
+          mov    Feil,1                   ;Fil feil
+          mov    ah,02
+          mov    dl,7
+          int    21h                      ;Gi irriterende lyd
+          jmp    Slutt                    ;Avslutt programmet tvert
+

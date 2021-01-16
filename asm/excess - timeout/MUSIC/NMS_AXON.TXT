@@ -1,0 +1,299 @@
+SYNKING
+컴컴컴컴컴컴컴컴컴컴컴컴
+
+lea eax,vblank                  ; Routine to jump to every vblank
+call nms_activatesync
+
+mov nms_jmp_tick,offset tick    ; Jump to tick every tick
+mov nms_jmp_row,offset row      ; Jump to row every row
+mov nms_jmp_cmd,offset cmd      ; Jump to cmd every every special command
+mov nms_jmp_end,offset end      ; Jump to end every time module hits end
+
+mov nms_jmp_tick,offset nms_dummy   ;Restore
+mov nms_jmp_row,offset nms_dummy    ;Restore
+mov nms_jmp_cmd,offset nms_dummy    ;Restore
+mov nms_jmp_end,offset nms_dummy    ;Restore
+
+call nms_deactivatesync         ; Deactivate
+
+vblank PROC USES ebx
+ mov ebx,screen
+ inc dword ptr [ebx]
+ ret
+vblank ENDP
+
+tick PROC USES ebx
+ mov ebx,screen
+ inc dword ptr 4[ebx]
+ ret
+tick ENDP
+
+row PROC USES ebx
+ mov ebx,screen
+ inc dword ptr 8[ebx]
+ ret
+row ENDP
+
+cmd PROC USES eax edx   ;Special Commands XM='S',MOD='8'
+ lea edx,cmdtext        ;AL is the syntax byte
+ mov ah,9h
+ int 21h
+ ret
+cmdtext db 'Special Command activated!',13,10,36
+cmd ENDP
+
+end PROC
+ lea edx,endtext
+ mov ah,9h
+ int 21h
+ ret
+endtext db 'End of module reached!',13,10,36
+end ENDP
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+Functions:
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_autoinit
+컴컴컴컴컴컴컴컴컴컴컴컴
+Autodetect and initialize soundcard
+
+Output: carry: set - failed!, clear - OK!
+        eax - pointer to musicsystem name with (13,10,36)
+        ebx - pointer to soundcard name ending with (13,10,36)
+        ecx - pointer to dosextender name ending with (13,10,36)
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_autoconfig
+컴컴컴컴컴컴컴컴컴컴컴컴
+Autodetect and initialize soundcard
+
+Input:  esi - pointer to asciiz string containing config filename.
+              if you don't want it to save a config file just let esi
+              be zero.
+Output: carry: set - failed!, clear - OK!
+        eax - pointer to musicsystem name with (13,10,36)
+        ebx - pointer to soundcard name ending with (13,10,36)
+        ecx - pointer to dosextender name ending with (13,10,36)
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_autoexit
+컴컴컴컴컴컴컴컴컴컴컴컴
+Deinitializes the soudncard driver.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_autoplay
+컴컴컴컴컴컴컴컴컴컴컴컴
+Initliaizes a module and starts playing it.
+
+Input:  esi - pointer to module.
+Output: carry: set - failed!, clear - OK!
+        eax - pointer to module format name ending with (13,10,36)
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_autostop
+컴컴컴컴컴컴컴컴컴컴컴컴
+Stops playing the module and deinitializes it.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_autodetect
+컴컴컴컴컴컴컴컴컴컴컴컴
+Detects which soundcards are present in system.
+
+Input:  esi - pointer to driver list containing pointers to driver
+              command lists. Ends with a -1.d
+              use music_drivers.
+        edi - pointer to empty buffer.
+Output: carry: set - None detected, clear - OK!
+        edi - pointer to list of useable cards, if any. Ends
+              with a -1.d.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_autoidentify
+컴컴컴컴컴컴컴컴컴컴컴컴
+Determines the module format.
+
+Input:  esi - pointer to format list containing pointers to format
+              command lists.Ends with a -1.d
+              use music_formats.
+        edi - pointer to empty buffer.
+Output: carry: set - Not identified., clear - OK!
+        edi - pointer to format command structure, if any. Ends
+              with a -1.d.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_detect
+컴컴컴컴컴컴컴컴컴컴컴컴
+Tests if soundcard present.
+
+Input:  esi - pointer to driver command list.
+Output: carry: set - Failed!, clear - OK!
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_setcard
+컴컴컴컴컴컴컴컴컴컴컴컴
+Sets the card wanted. This must be called before any activity with
+soundcard!
+
+Input:  esi - pointer to driver structure.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_init
+컴컴컴컴컴컴컴컴컴컴컴컴
+Initializes the soundcard set with music_setcard.
+
+Output: carry set - failed!, clear - OK!
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_exit
+컴컴컴컴컴컴컴컴컴컴컴컴
+DeInitializes the soundcard set with music_setcard.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_identify
+컴컴컴컴컴컴컴컴컴컴컴컴
+Tests if it's the correct driver for module.
+
+Input:  esi - pointer to format command list.
+        edi - pointer to module.
+Output: carry: set - Failed!, clear - OK!
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_setformat
+컴컴컴컴컴컴컴컴컴컴컴컴
+Set module format requested. This must be called before playing the
+module.
+
+Input:  esi - pointer to format structure.
+        edi - pointer to module
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_initplay
+컴컴컴컴컴컴컴컴컴컴컴컴
+Initializes the module player set with music_setformat.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_exitplay
+컴컴컴컴컴컴컴컴컴컴컴컴
+DeInitializes the module player set with music_setformat.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_play
+컴컴컴컴컴컴컴컴컴컴컴컴
+Activates the module player.
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+music_stop
+컴컴컴컴컴컴컴컴컴컴컴컴
+Deactivates the module player.
+
+컴컴컴컴컴컴컴컴
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+Variables:
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+Variable:       music_drivers:dword
+Description:    Pointer to a list of driver pointers.
+컴컴컴컴컴컴컴컴
+Variable:       music_formats:dword
+Description:    Pointer to a list of format pointers.
+컴컴컴컴컴컴컴컴
+Variable:       music_jmp_tick:dword
+Description:    Pointer to a piece of code that the module will call
+                every tick.
+컴컴컴컴컴컴컴컴
+Variable:       music_jmp_row:dword
+Description:    Pointer to a piece of code that the module will call
+                every change of row.
+컴컴컴컴컴컴컴컴
+Variable:       music_jmp_cmd:dword
+Description:    Pointer to a piece of code that the module will a
+                special command is used.
+                In the mod format it's command 8. It can be used to
+                sync production.
+컴컴컴컴컴컴컴컴
+Variable:       music_jmp_end:dword
+Description:    Pointer to a piece of code that the module will when
+                the module ends.
+컴컴컴컴컴컴컴컴
+Variable:       music_modulepos:dword
+Description:    Contains Songpos.w+Pattpos.w.
+컴컴컴컴컴컴컴컴
+Variable:       music_error:dword
+Description:    Contains the error code if an error has occured.
+컴컴컴컴컴컴컴컴
+Variable:       music_errors:dword
+Description:    A list of pointers to error messages.
+컴컴컴컴컴컴컴컴
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+; This will autodetect the soundcard present and use the card found in
+; this order: GUS , PAS , SB , NOSound.
+call music_autoinit
+if carry set then
+ ErrorNumber=music_error;
+ ErrorTxtPtr=music_errors[ErrorNumber*4]
+else
+ MusicsystemnamePtr=eax;
+ SoundDriverNamePtr=ebx;
+ PMHandlerNamePtr=ecx;
+
+:Play
+let esi=ModulePtr   ; Pointer in memory where the module is present
+call music_autoplay
+if carry set then
+ call music_autoexit;
+ ErrorNumber=music_error;
+ ErrorTxtPtr=music_errors[ErrorNumber*4];
+ End
+else ModuleFormatNamePtr=eax    ; no errors, should be playing!
+
+waitkey
+
+call music_autostop             ; Stops playing the module
+if more modules then goto Play
+call music_autoexit             ; Shutdown soundcard driver
+end
+
+
+컴컴컴컴컴컴컴컴컴컴컴컴
+or:
+컴컴컴컴컴컴컴컴컴컴컴컴
+
+
+let esi=ConfigfilenamePtr;          (* ASCIIZ! , Set esi to zero if you don't want any config file save *)
+call music_autoconfig
+if carry set then
+ ErrorNumber=music_error;
+ ErrorTxtPtr=music_errors[ErrorNumber*4]
+else
+ MusicsystemnamePtr=eax;
+ SoundDriverNamePtr=ebx;
+ PMHandlerNamePtr=ecx;
+                                        (* This will prompt the user for his/her soundcard configuration and use the card *)
+:Play
+let     esi=ModulePtr
+                                        (* Pointer in memory where the module is present *)
+call    music_autoplay
+if      carry set then call music_autoexit;
+                       ErrorNumber=music_error;
+                       ErrorTxtPtr=music_errors[ErrorNumber*4];
+                       End
+else    ModuleFormatNamePtr=eax         (* If there was no error it should be playing! *)
+
+waitkey
+
+call    music_autostop                  (* Stops playing the module *)
+if      more modules then goto Play
+call    music_autoexit                  (* Shutdown soundcard driver *)
+end
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+
+The hard way:
+
+Don't bother! Yet..
+

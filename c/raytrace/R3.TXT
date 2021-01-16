@@ -1,0 +1,35 @@
+Del opp 320x200 skjerm i 4x4 blokker... Raytrace hver "blokk" f›rst
+(80x50)..
+Deretter kj›rer vi en post-process runde, hvor vi sjekker hver blokk. Hvis
+hvert hj›rne treffer samme objekt, interpolerer vi fargen mellom dem,
+eller raytracer vi senter av blokk for bedre aliasing..
+
+1...1
+.....
+.....
+.....
+1...1
+
+Her interpolerer vi fargene
+
+1...1
+.....
+.....
+.....
+2...1
+
+N† raytracer vi en ekstra ray:
+
+
+1...1
+.....
+..1..
+.....
+2...1
+
+Og interpolere 2x2 blokker mellom dem istedenfor..
+
+Eller vi kan sjekke forskjellen i farge...
+Vi sjekker forskjell i R›d, Gr›nn og Bl†, summerer forskjellen (abs?), og
+sjekker mot en threshold...
+

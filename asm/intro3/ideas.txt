@@ -1,0 +1,160 @@
+Navn: Orbit..
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Design
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+(OrangeJuice Modulen, eller en med omtrent samme arrangement - i
+starten iallefall)
+
+1. Musikken starter
+2. WobTun fades opp fra svart, Plasma-aktig texture - omtrent s†nn som
+   den bl† som er n†.
+3. Hvert Smell/takt flashes stor text inn over WobTun'en, hvit
+   halv-glenz. Fades bort igjen f›r neste flashes inn...
+4. Siste text - logo (ORBIT?) st†r igjen litt, texturen fades til mer
+   "vegg" texture istedenfor at orbit/logo fades...
+5. EnvMap objekt faller ned fra topp av skjerm, treffer orbit/logo
+   akkurat id‚t bass-tromma sl†r.. Logo faller ned (evt. med annet
+   bitmap - knust eller b›yd - aktig), EnvMap spretter opp og roer seg
+   ca. midt p†... Snurrer fort <-> (en X?)
+6. N†r musikken skifter til r†ere, flasher skjerm, og tunellen blir
+   vanlig tunell, vegg-texture, som fyker kjapt, og evt. svinger mye
+   hvis jeg rekker † kode den om...
+...
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Rutiner
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+- 3D object Morphing... Start og slutt (X,Y,Z), deretter morphe mellom
+  disse p† n steps. Tabell med ADDERE initieres ved demo-start.. SQRT
+  tabell defineres p† forh†nd, for normaler... X/Y/Z -> X/Y.. Hvis
+  lengden skal v‘re mellom 0 og 127
+- 3D objekt faller ned p† et eller annet p† skjermen (logoting), logo
+  faller ned (evt. med flash og "smashed" bitmap), mens 3D objektet
+  spretter opp og roer seg midt p† skjermen - snurrer FORT... <->
+- Et objekt (rakett/ild) skytes fra skjerm (evt. litt fra siden -
+  venstre hj›rne omtrent?) mot objektet som snurrer..
+- Eksplosjon n†r det treffer...
+  Alle polygons deles opp i enkelt-biter. fyker kjapt i samme retning
+  som Face-Normalen, roteringen speedes opp... Ved ut-tegning -
+  polygons opp til z=objekt-sentrum tegnes.. deretter
+  eksplosjons-bitmap, deretter alle foran...
+- 2 Objekter med samme X,Y,Z sentrum, roterer forskjellig vei -
+  Z-buffer, skaleres forskjellig opp og ned
+- 5 objekter X E N O N roteres individuelt - ZBuffer for SpaceCut
+  (bruk 5 nederste bits av pixelen, s† kan de ha forskjellig
+  farge/texture)
+- Tunnel, men wobble/duffle texturen f›r utsetting til skjerm!
+- 3D objekt snurrer... Et bitmap kopieres inn til bakgrunns-bufferet,
+  ‚n linje pr retrace... Bufferet kopieres til vanlig buffer hver
+  runde, for: Sletting av buffer og innlegging av bakgrunn bak objekt
+- 3D kule - ett og ett polygon forsvinner, eller halvparten, annethver
+  s† den ser ut som appelsinskall, eller annethver s† det blir nesten
+  3-kantet sjakkm›nster! eller noe slikt...
+- Vertikal GFX (venstre eller h›yre side) spretter inn, treffer kant,
+  og spretter igjen (og roer seg etterhvert), i takt med musikk..
+- Tunell med Z-buffer (= Ypos bufferet muligens litt modifisert)
+- Plasma: 2 lag, ett for X og ett for Y - noe al  EnvMap plasma? ;)
+- Animerte 3D objekter... Ha flere † cycle mellom... Eller 2 stk i EXE
+  fila, som det morphes mellom i oppstart av demo, og cycle mellom
+  alle steps...
+- Begynnelse: Bitmap zoomes sakte mot skjerm. Motion Blur...
+  Bl†-aktig. Smell/musikk - Flashes inn - no blur
+- Roterende objekt - et objekt roterer = part av et annet st›rre
+  objekt.. F.eks Viserne inne i ei klokke - 2-3 ringer inne i
+  hverandre.. Matriser - Multiply Matrix..
+- SpaceCut objekter... Skaleres opp og ned, begge objekter, s† de p†
+  en m†te g†r inn og ut av hverandre. Gj›res enklest ved †
+  multiplisere hver koordinat med en verdi, enten f›r sortering, eller
+  tegning eller noe slikt...
+- 3D objekt - bakgrunn = rotozoom, min/max 1 blide p† skjermen
+  samtidig (Show/M12) - med motion blur p† blidet - eller "OrangeBlur"
+  - Skifter senere (flash) til tunell m/blur - skifter raskt -
+  musikk-takt-techno..
+  Objektet motion-blur'ed
+- Tunell - texturen Duffles f›r den brukes i tunell
+- Zoom/Smooth... Tabell al  tunell, men, inneholder offset til pixel
+  (p† skjerm) som skal hentes "hit"... Deretter, etter henting,
+  smooth...
+
+MIKE X
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Effekt: Et romskip/-fly raser gjennom et asteroidefelt. Like etter kommer et
+        til som jager det f›rste. Vi f†r en vill jakt, og nr1 kr‘sjer inn i
+        en asteroide og BANG! eksplosjon. Mens eksplosjonen p†g†r ser vi
+        skip 2 svinge og komme rett mot kameraet, for s† † fly dritfort rett
+        over.
+Musikk: Techno!
+
+Effekt: Passende for denne † komme like etter fly-scenen..
+        En kule kommer inn langt bak i skjermen og holder seg der. N†r bass-
+        tromma begynner ser vi at den skyter ut en og en lysstr†le fra hull
+        i seg. N†r alle str†lene er kommet ut, og patternet er ferdig,
+        kommer den med basstromma nerme skjermen, roterende, og p† neste
+        basstromme halvveis tilbake igjen, s† fram, etc, etc...
+        Lyset skal blende n†r det lyser p† kameraet, men ikke blende s†
+        kraftig at alt blir hvitt.
+Musikk: Fortsatt techno
+
+
+
+Effekt: Torus som roteres (gouraud/phong/envmap) en stund, s† zoomes den
+        slik at den blir liten og vi se at det er masse toruser ved siden
+        av hverandre! De roteres med et lite delay i forhold til hverandre.
+        Opp† dette kan vi s† ha en writer, der vi kort skriver ut credits
+        (en cred av gangen p† skjermen), f›r vi fader den ut p† en kul 
+        m†te.
+Musikk: Bygger seg opp, og n†r alle torusene vises kommer et helt utrolig
+        orgasmisk refreng!
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+Div
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Using A.Rend. - (C)Axon 1995 ;)
+
+
+
+Greetings
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Adam Seychell : DOS32
+Tobias Gloth/Valhalla : modified Cascada player
+Alexander Boczar : Noice Music System
+Gloom (for Sample CD), eller hva, Michal?
+Tran : Pmode
+
+Calvin, Easty, Yitzhaq, MoonWalker
+Sorrox, Proxima, Inf, Spin
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+- Psychose demo maker kit - LZH pakking - 32bmm support -
+  ProtectedMode...
+- S›k f›rst etter enten signature, eller slutten av EXE file (EXE
+  header), hvis signatur p† slutten av EXE, sett AppendPos, og
+  DataFilename, til EXE, ellers bruk ekstern datafil..
+- Keyboard handler, eller koble ut keyaobrd totalt.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Andre ideer † sjekke ut:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş Splines - Spline polygons... 6 coords istdf. 3
+
+
+  1             B-Spline 1 = 1-a-2
+     a                   2 = 2-b-3
+ c                       3 = 3-c-1
+        2
+3   b
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ş Pre-kalkulerte Morph-koordinater for morphing mellom 2 eller flere
+  objekter... Enten prekalkuler i Init, eller include i EXE..
+
+ş 3D rutina - istedenfor polygon coordinate # list - kanskje Vertex
+  list (Slope list)... Dermed slipper vi unna med 1/2 s† mange IDIV's
+
+ş 3D landskap al  Terminal Velocity / Magic Carpet
+ş 3D landskap al  Comanche/Mars (med texture)
+
+ş Wobbling FixedPoint
+
+
+

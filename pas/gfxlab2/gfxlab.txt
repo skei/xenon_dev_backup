@@ -1,0 +1,65 @@
+GfxLab v0.2á - (C) 1995 - Axon/Xenon Development (Tor-Helge Skei)
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+First of all, I'm a coder, not a writer, so don't expect too much from
+this DOC file! And, excuse my spelling/grammar errors - I'm from
+Norway! :)
+
+Let's take it short:
+
+Main Menu
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Press Right mouse button to bring it up. Try the buttons.. Easy to
+understand..
+
+Load Menu
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+This one should be quite easy to understand too.. But a few things
+need a bit more explanation... You have to select the file-format by
+pressing the button initially marked "GIF" (or RAW in the Save menu),
+until it indicates format to use..
+ChDir "remembers" current drive/directory 'til next time the Load Menu is
+entered.
+
+Save Menu
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Almose exactly the same as the Load Menu..
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+"To do" list:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ş Write a better DOC file :)
+ş Palette editor
+  I have som MAJOR ideas here... Expect to see something never seen
+  before...
+ş Font/Sprite grabber
+ş A few image manipulation tools, like:
+  - Smooth
+  - Resize
+  - Flip/Mirror
+  - Rotate
+ş Save GIF (working on it)
+ş Speed up loading routines, especially PCX - convert to ASM
+ş Save (and Load?) DB format (goodbye, BIN2DB!)
+ş Some fine-tuning of the GUI. Speeding up a few parts.
+ş Add some method of running external programs, with VGA-screen (or
+  some buffer) available/accessible, so that other persons can write
+  their own utils for GfxLab.
+  And a menu for these..
+ş Higher resolutin.. Thought about at least 640x480..
+ş Support for planar formats, tweaked and 4-plane modes, save planes
+  separated in RAW & DB..
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Revisions:
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+v0.1á
+- First version. Not released. Interface sucked. Only loading &
+  saving, minor palette editor, font/sprite grabber..
+  Sources deleted!
+
+v0.2á
+- New GUI (some optimizations still needed)
+- Loads GIF, BMP, PCX & RAW
+- Saves PCX & RAW
+

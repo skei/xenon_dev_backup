@@ -1,0 +1,249 @@
+>    the blobs are those circles (usually 3 or 4) which interfer (?) each
+> other..
+>    I saw it in Despair / Iguana or in Oxygene.
+>
+>    They look great, and i'm searching how to code it...
+
+I think there's a couple of ways...  There's my way, and another way
+that seems to be the "real" way.  I've seen both, but only know how one
+works.
+
+For my way, I created a height map containing a "bump" in the shape of
+1/radius.  This made a very tall center, sloping quickly down and almost
+(but not quite) leveling out reasonably quickly.
+
+Once I had this height map, I treated it almost as a really big shadebob
+(my height map was 640x400, screen mode 320x200) and moved four of them
+around the screen.  However, the blobs would only add together for one
+frame, and the results would (quite purposely) not build up from frame
+to frame.
+
+To cause interference, I added two blobs but subtracted two others; and
+they canceled each other out when they touched.  The effect ran at about
+35 fps on a 486/66 at 320x200 resolution.
+
+
+-----------------------------------------------------------------------------
+
+>In several locations I have arrays of doubles that need to
+>be converted from doubles (or floats) to ints. The problem
+>is that float() or double() conversion routine that comes
+>along with my compiler (MSVCC) does the something like the
+>following:
+>
+I just ran into the same problem... this is bullshit.
+This routine is going to blow about 40 clocks + time for
+a function call just to do a conversion.  I'm not too big on assembly,
+so for my application I wrote an inline routine in C++ to convert
+between IEEE 754 FP numbers and integer.  It works well and I think it
+uses about 15 clocks.  You might consider doing the same.  A lot
+depends on what kind of rounding you need... that is what the fldcw is
+there to do... set the rounding to a known state and then restore it
+after you are done.  Obviously you could eliminate this if you were
+working on an entire array.
+
+One recommendation to anyone programming high performance apps on
+Intel is to get Intel VTune.  A 30 day eval is available on the Intel
+web site.  You should especially get this if you are not that good at
+assembler, since it helps you understand what conditions need to be
+met to get maximum performance out of the processor.  In fact, VTune
+will recognize the float->int conversion in a program, alert you of a
+possible performance problem, and give suggestions about what to do.
+
+This is what I did, if you come up with another solution, please let
+me know.
+
+inline int float_to_int(float &fval)
+{
+        int retval;
+
+        int val = *(unsigned int *)((void *)&fval);
+
+        if (!(val & ((unsigned int)0xFFFFFFFF >> 1)))
+                return 0;
+
+        unsigned int shift_by = 150 - int((val & exponent_mask) >>23);
+        unsigned int mantissa = (val & mantissa_mask) | (1 << 23);
+
+        if (shift_by < 32)
+                retval = mantissa >> shift_by;
+        else retval = 0;
+
+        if ( val & (1 << 31) )
+                retval = -retval;
+
+        return retval;
+}
+
+
+
+BTW i would consider the first fldcw to be an initialization step...
+not actual work....  the only actual work is the fistp IMO.
+
+>initialization:
+>    push
+>    wait
+>    fnstcw
+>    wait
+>    mov
+>    or
+>    mov
+>
+>the the actual work:
+>    fldcw
+>    fistp
+>
+>and then some cleanup:
+>    fldcw
+>    mov
+>    mov
+>    pop
+>    leave
+>
+>I am sorry if my interpretation of initialization/work/cleanup
+>is not correct. I just don't understand asm. Still, anyone
+>can see that this is totally ridiculous. Two waits, several
+>movs, ... all for one single float to int conversion.
+>
+>I wish I could convert arrays by having a loop in between of
+>initialization and cleanup doing the actual work. Once we
+>have driven the fpu into suitable mode we could use a simple
+>look to convert the floats to ints. I do not care if I have
+>to use that less accurate fadd int conversion trick (fadd,
+>fstp, mov) to avoid some problems associated with fistp.
+>
+>So, my basic need is an algorithm for Pentium (Pro) that does
+>the float to int conversion as fast as possible, and, that has
+>the following form:
+>
+>void CopyFloatArrayToInts(int *to, float *from, int n);
+>
+>If faster, it could even be a in place copy:
+>void CopyFloatArrayToInts(float *from, int n);
+>
+>I am pretty sure that such an algorithm would be quite
+>useful for many purposes, including OpenGL implementations
+>like Mesa.
+>
+>If it is of any interest I am using Visual C++ 4.0 on a ppro 200,
+>but I have found that the float -> int conversion problem is pretty
+>universal for both the compilers and architectures, including gcc,
+>digitals nt alpha compilers, hppa, sparc, pentium, ...
+>
+
+-----------------------------------------------------------------------------
+
+> I just ran into the same problem... this is bullshit.
+> This routine is going to blow about 40 clocks + time for
+> a function call just to do a conversion.  I'm not too big on assembly,
+> so for my application I wrote an inline routine in C++ to convert
+> between IEEE 754 FP numbers and integer.  It works well and I think it
+> uses about 15 clocks.
+[code snipped]
+
+How about this:
+
+inline int float_to_int(float f)
+{
+ f += 0xC00000;
+ return *(short int *)&f;
+}
+
+-----------------------------------------------------------------------------
+
+>> I just ran into the same problem... this is bullshit.
+>> This routine is going to blow about 40 clocks + time for
+>> a function call just to do a conversion.  I'm not too big on assembly,
+>> so for my application I wrote an inline routine in C++ to convert
+>> between IEEE 754 FP numbers and integer.  It works well and I think it
+>> uses about 15 clocks.
+>[code snipped]
+>
+>How about this:
+>
+>inline int float_to_int(float f)
+>{
+> f += 0xC00000;
+> return *(short int *)&f;
+>}
+>
+>Cheers,
+>
+>Mark Feldman
+>http://www.geocities.com/SiliconValley/2151
+
+Or this:
+
+/* Magic to convert float to int devised by Terje Mathisen
+   Works with 32-bit compilers generating code for x86 processors
+*/
+#define  S  65536.0
+#define  MAGIC  (((S * S * 16) + (S*.5)) * S)
+#pragma  inline  float2int;
+long float2int( float d )
+{
+  double dtemp = MAGIC + d;
+  return (*(long *)&dtemp) - 0x80000000;
+}
+
+-----------------------------------------------------------------------------
+
+> It's quite simple to make a function similar to printf that uses this
+> function. I'll leave that as an exercise to the reader though. :o)
+>
+The function described was very useful indeed!
+And since others may not like exercises as much as I do,
+
+
+void DebugPrint( char* fmt,...)
+{
+        char buf[256];
+        va_list args;
+
+        va_start(args, fmt);
+        vsprintf(buf, fmt, args);
+
+        va_end(args);
+        OutputDebugString( buf );
+}
+
+--- ????? ----- following -----
+
+void DebugPrint( char* fmt,...)
+{
+        char buf[256];
+        va_list args;
+
+        va_start(args, fmt);
+        //vsprintf(buf, fmt, args);
+        _vsnprintf(buf, 256, fmt, args);
+
+        va_end(args);
+        OutputDebugString( buf );
+}
+
+-----------------------------------------------------------------------------
+
+> I would really like to know how to do that. My textures wobble around
+> all the time especially on adjacent polygons that have been split up
+> by the bsp-tree. I'm using floating poxcints right up to the inner loop
+> but it does not seem to help.
+
+Let's say your horizontal scanline goes from x1=10.2 to x2=53.6. The
+first task is to figure out which pixels on the screen should actually
+get drawn. The formula is:
+
+int screen_x1 = ceil(x1);
+int screen_x2 = ceil(x2)-1;
+
+This will return values of screen_x1=11 and screen_x2=53. When you go to
+plot your first pixel at x=11 you must calculate the <u,v> values at
+x=11. The big mistake most people make is to use the value at x=10.2.
+That's what causes your textures to wobble, the u/v values have changed
+by 0.8th of a pixel by the time x reaches 11.
+
+It should also be obvious that you need to apply the same reasoning when
+scanning the edges in the y direction.
+
+-----------------------------------------------------------------------------
+

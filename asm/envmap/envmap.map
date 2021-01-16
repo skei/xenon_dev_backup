@@ -1,0 +1,12 @@
+
+ Start  Stop   Length Name               Class
+
+ 00000H 014A6H 014A7H ENVMAP_TEXT        CODE
+ 014B0H 094AFH 08000H TEXTURESEG         
+ 094B0H 194AFH 10000H BUFFERSEG          
+ 194B0H 1B4B3H 02004H TREDSEGMENT        
+ 1B4C0H 241F3H 08D34H _DATA              DATA
+ 24200H 245FFH 00400H STACK              STACK
+
+Program entry point at 0000:148B
+

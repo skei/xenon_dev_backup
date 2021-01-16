@@ -1,0 +1,23 @@
+Pixelize effekt - tegn hver n'te pixel n ganger, deretter ›k Texture
+index med n.. Tegn samme linja n ganger...
+
+PixWidth EQU 320
+
+LineBuf dw PixWidth dup(?)
+Pixelize dw ?
+
+ xor di,di
+@@2:
+ mov al,[Texture+bx]
+ mov cx,[PIxelize]
+@@1:
+ mov [es:LineBuf+di],al
+ inc di
+ cmp di,320
+ jnb @@2
+ dec cx
+ jnz @@1
+ @@2:
+ add bx,[Pixelize]
+ jmp
+

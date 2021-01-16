@@ -1,0 +1,23 @@
+Intro #3 (ORBIT -> Arbeids-tittel)
+컴컴컴컴컴컴컴컴컴컴컴컴
+
+OrangeJuice modulen, eller en med omtrent samme arrangement
+
+1. Musikk starter, wobbling-tunell fades opp fra svart mens den g냨.
+2. Ved hvert av de fire markante "smellene" flasher skjermen, og kort
+   tekst smelles inn (bitmaps, stor hvit, halvglenz font), som f.eks
+   Code : Axon, Music : Mike X, GFX : Various :), DEMO-TITTEL..
+   Midt mellom slagene, fades disse igjen helt bort
+3. Siste tekst st냨 igjen, et 3D objekt faller fra toppen av skjemen
+   litt skr냪t nedover (
+   컴컴컴컴컴컴컴컴컴컴컴컴
+
+Ret somd et er, kommer beskjeder, som:
+
+The universe is expanding
+The first encounter
+Journey beyond human experience
+Travel through time
+Expand your mind
+etc...
+

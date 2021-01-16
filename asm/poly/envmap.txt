@@ -1,0 +1,29 @@
+CoordBlock
+
+word    ; antall 3D koordinater
+word    ; antall Normaler
+word    ; antall Faces
+word    ; Offset i 3D-segmentet til Koordinatene
+word    ; --"--                     Normalene
+word    ; --"--                     Faces'ene
+3 words ; X, Y og Z Roterings-vinkel
+3 words ; X, Y og Z adder for Projektering
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+
+ProcessCoords
+
+- for i = 1 to Antall koordinater
+  - hent inn XYZ
+  - Roter XYZ med Koordinat-vinkler
+  - Projekter og lagre(X,Y i TriCoords, Z i egen liste)
+- for i = 1 to Antall Normaler
+  - hent inn XYZ
+  - Roter XYZ med Koordinat-vinkler
+  - Projekter of lagre (X og Y som
+
+쌽 si
+if [SI] = 0ffffh then end
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+

@@ -1,0 +1,18 @@
+TriCoords
+ dw y
+ dw x
+
+TexCoords
+ dw y
+ dx x
+
+Coords
+ dw,dw,dw,dw - x,y,z,0
+
+Normals
+ dw,dw,dw,dw - x,y,z,0
+
+Faces
+ dw,dw,dw,dw - 1,2,3,0
+
+1.

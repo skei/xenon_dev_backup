@@ -1,0 +1,68 @@
+;-----------------------------------------------------------------------------
+; RotPalette - Rotates the palette and do fading.
+; In:
+;   Palette - Source palette.
+;   Fade    - Fading level.
+;-----------------------------------------------------------------------------
+
+RotPalette      proc near Fade:word
+
+                mov     ax,ds
+                mov     es,ax
+
+                lea     di,[FadePalette]
+                mov     cx,16*3
+                xor     ax,ax
+                cld
+                rep     stosb
+                lea     si,[Palette+32*3]
+                mov     cx,224*3
+                cld
+                rep     movsb
+                lea     si,[Palette+16*3]
+                mov     cx,16*3
+                rep     movsb
+
+                lea     bx,[FadePalette]
+                mov     cx,16
+RotLoop:        push    cx
+                mov     si,bx
+                mov     di,bx
+                lodsb
+                mov     ah,al
+                lodsb
+                mov     dl,al
+                lodsb
+                mov     dh,al
+                mov     cx,15*3
+                rep     movsb
+                mov     al,ah
+                stosb
+                mov     al,dl
+                stosb
+                mov     al,dh
+                stosb
+                add     bx,16*3
+                pop     cx
+                loop    RotLoop
+
+                lea     si,[FadePalette]
+                lea     di,[Palette]
+                mov     cx,768
+                rep     movsb
+
+                lea     si,[FadePalette]
+                mov     cx,768
+                mov     dx,[Fade]
+FadeLoop:       mov     al,[si]
+                mul     dl
+                shr     ax,7
+                mov     [si],al
+                inc     si
+                loop    FadeLoop
+
+                lea     si,[FadePalette]
+                call    SetPalette
+                ret
+
+RotPalette      endp

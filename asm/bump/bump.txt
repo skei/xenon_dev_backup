@@ -1,0 +1,46 @@
+BUMP MAPPING
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Texture Mapping rutina ser p† 2 Textures...
+Texture 1: Vanlig EnvMap
+        2: Samme, men koordinatene roteres ikke (holdes lik for alle
+           polygoner), data i texturen adderes (eller modifiseres p†
+           annen m†te) til den andre mappinga..
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Register Usage
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+EAX                     Temp inner
+EBX                     Temp inner
+ECX     Xint:Xfrac      Yint:Yfrac      Bump texture
+EDX     xint:xfrax      yint:yfrac      Phong texture
+ESI
+EDI                     Screen/Buffer pos
+EBP
+ESP
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+SelfMod code i flust! For † slippe † overf›re verdier fram og tilbake
+mellom registre, og slippe † ha Variabler i minnet som settes, og
+deretter hentes inn igjen.. Sett heller rett inn i koden. Variablene =
+immediate data til registrene)
+
+Outer:
+ mov di,1234h
+Ypos = $-2
+
+ mov ecx,12345678h  ; Bump index
+ mov edx,12345678h  ; Phong index
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Inner:
+ shld ebx,ecx,8
+ mov bh,ch          ; BX -> Bump Texture
+ add ecx,12345678h  ; Update Bump-indexes
+ mov al,[fs:bx]
+ mov ah,[gs:bx]     ; CX = Index-adder to Phong-texture
+ shld ebx,edx,8
+ mov bh,dh          ; BX -> Phong texture
+ add edx,12345678h  ; Update Phong-indexes
+ add bx,ax          ; Add index adder to Phong texture position
+ mov cl,[ds:bx]     ; CL = Pixel
+ mov [es:di],cl
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ add w [CS:Ypos],320+

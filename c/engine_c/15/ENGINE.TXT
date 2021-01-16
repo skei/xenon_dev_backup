@@ -1,0 +1,74 @@
+Multiple lightsources (distant, point)
+Gouraud shaded, linear texure mapping.
+Hierarchical(, linked) objects
+full 6-degrees of freedom.
+Multiple object instancing.
+3DS converter for objects and materials.
+Specular highlights.
+3D transformations with fixed point or float math.
+
+Planned, or not finished yet:
+
+. perspective texture mapping
+- Optional z-buffer rendering.
+- Animated textures
+. Full transparency, including alpha maps for texture.
+. Sprites and bitmaps.
+- Spline interpolated motion
+. SVGA support - VBE2
+. Depth cueing, fogging.
+. (2D and) 3D Clipping
+. Multiple cameras that render into windows or textures.
+  Fast shadows with shadow mapping.
+. Phong and bump-mapping.
+  Anti-aliasing, 2D effects like lens-flares and fire.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+
+Full feature listing
+
+     competely open architecture, with an intuitive and versatile API,
+ideal for porting code
+     programming surface and header files for Watcom C/C++ flat model,
+Microsoft VC++
+     simple yet powerful importing of custom file formats such as 3D
+Studio and LightWave 3D
+     efficient algorithms combined to uncompromising low-level
+optimization
+     accurate fixed point and floating point math with full 16x16
+sub-pixel accuracy
+     compact code, resulting in a run-time memory footprint under 200Kb
+     performance tuned for the Pentium processor
+     fully virtualized hardware device layer for hardware acceleration
+
+     dual-texturing with two shading gradients to deliver an unlimited
+amount of effects, from phong shading to reflective chrome
+     surfaces
+     8/15/16/24 and 32bit rendering modes for all (S)VGA resolutions
+     perspective correct and affine interpolation with adjustable
+precision
+     full perspective correction for both texture and shading gradients
+     alpha rendering and texture key-color masking
+     texture mip-mapping for improved image quality and lower pixellation
+     integrated material library management with load-time color
+quantization
+     hierachial, chunk based file format for versatile scene storage
+     bitmap objects and 3D sprites
+     multiple light sources with realistic illumination models
+     lens flare, lens reflection, smoke and glow special effects
+     full dynamic particle/emitter system with OOP callbacks
+     easy mesh animation and morphing
+     complete hierarchial manipulation for all objects including cameras
+and light sources
+     pre-emptive triangular clipping to make interfacing new rasterizer
+code for both hardware and software simple and
+     straightforward
+     optional Z-buffering and polygon radix sort with 24 bits of depth
+     image filtering and real-time post-processing
+     stereoscopic 3D rendering for head-mounted displays such as the
+iGlasses and VFX1
+     native Glide 2.0 interface for 3Dfx Voodoo Graphics hardware 3D
+accelerator
+     native MSI95 interface for Matrox Mystique 2D and 3D accelerator
+     interface to DirectX2.0 under Win95 and NT for maximal
+Windows-performance

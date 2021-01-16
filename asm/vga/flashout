@@ -1,0 +1,32 @@
+;-----------------------------------------------------------------------------
+; FlashOut - Flash fade-out effect.
+; In:
+;  Palette - Source palette.
+;-----------------------------------------------------------------------------
+
+FlashOut        proc near
+
+                mov     ax,ds
+                mov     es,ax
+                cld
+                lea     di,[ToPalette]          ; fade from source palette
+                mov     cx,768                  ; to white palette.
+                mov     al,3Fh
+                rep     stosb
+                lea     si,[Palette]
+                lea     di,[FromPalette]
+                mov     cx,768
+                rep     movsb
+                call    FadeTo
+                lea     di,[FromPalette]        ; fade from white to black.
+                mov     cx,768
+                mov     al,3Fh
+                rep     stosb
+                lea     di,[ToPalette]
+                mov     cx,768
+                mov     al,00h
+                rep     stosb
+                call    FadeTo
+                ret
+
+FlashOut        endp

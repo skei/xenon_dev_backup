@@ -1,0 +1,47 @@
+Diverse id‚er til Demo-rutiner - Axon
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+Tabell som er f.eks 256*128 words.
+For † sette ut pixels, noe al  dette:
+
+pseudo:
+
+for y := 0 to 127 do
+begin
+ for x := 0 to 255 do
+ begin
+  Offset := Tabell[x,y]
+  Pixel := Texture[x,y]
+  mem[$a:offset] := Pixel
+ end
+end
+modify texture
+
+Tabellen kan v‘re definert som f.eks en tunell...
+Og i tillegg kan vi evt. ha en Offset modifier, f.eks sinus ??
+Modifis‚r X ved henting eller setting, eller Offset...
+Masse som kan gj›res bare man har fikset tabellen...
+
+Tabell-bredde b›r fikses s† den f.eks er delelig med 256, for kjappere
+index; mov bh,y, mov bl,x, evt med en Shift/add...
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+For † lage TunnOfs:
+
+1. 160,100 = offset 128,0 i bitmap...
+
+G† fra radius 0 til radius 160 p† 100 steps... = Y i texture
+G† rundt denne sirkelen og finn hvilken X verdi
+Sjekk for max antall pixels som kan forekomme, = antall sjekker..
+Sjekk hver pixel for hvilken av de 256 X verdiene den skal ha...
+Venstre = 0 og rundt med sola tilbake til denne :) p† 256 steps
+
+Noe al  dette...
+
+for Radius = 1 to 160 do
+begin
+ for steps := 0 to 255 do
+ begin
+  X := sinus[steps]
+  y := cosinus[steps]
+;  S†, finn hvor denne skal hentes fra :)
+
+
